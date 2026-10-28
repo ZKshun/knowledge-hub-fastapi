@@ -6,7 +6,7 @@
 
 ## 当前状态
 
-当前已完成 **v1 Task 1：原版契约基线与差分工具**：依赖已锁定，75 份原版 HTTP/双库快照已保存，31 项现有测试通过。FastAPI 业务接口仍待 Task 2–7 实施。这里的业务闭环描述最终目标，不表示全部功能已经可用。
+已完成 **v1 Task 1–2：原版契约基线、领域规则、配置、ID 与规模门禁**，实现、测试和独立审查通过。75 份原版 HTTP/双库快照保留；当前完整测试 113 通过、1 项数据库探针跳过。下一项为 Task 3；FastAPI 业务接口及双库实现仍待 Task 3–7。这里的业务闭环描述最终目标，不表示全部功能已经可用。
 
 新会话从 [AGENTS.md](AGENTS.md) 开始，随后读取 [当前进度与下一步](docs/refactor/status.md) 和 [开发 SOP](docs/refactor/agent-sop.md)。
 
@@ -64,7 +64,7 @@ Python 仓库位于本目录；同级 `../knowledge-hub-backend` 与 `../knowled
 | Agent 开发、验证、恢复和交接 | [开发 SOP](docs/refactor/agent-sop.md) |
 | 已确认的规则及其来源 | [决策记录](docs/refactor/decisions.md) |
 | v1 的具体工作 | [规格](docs/versions/v1/spec.md)、[实施计划](docs/superpowers/plans/2026-10-28-v1.md) |
-| 本阶段做了哪些需求、如何完成 | [Task 1 需求与实现报告](docs/versions/v1/task-1-report.md) |
+| 本阶段做了哪些需求、如何完成 | [Task 2 需求与实现报告](docs/versions/v1/task-2-report.md)、[Task 1 报告](docs/versions/v1/task-1-report.md) |
 | 历次工作与证据 | [工作日志](docs/refactor/work-log.md) |
 
 ## 运行与验证
@@ -74,10 +74,14 @@ Python 仓库位于本目录；同级 `../knowledge-hub-backend` 与 `../knowled
 ```bash
 uv sync --locked --all-groups --link-mode=copy
 uv run --locked pytest tests/unit tests/contract -q
+uv run --locked ruff format --check .
 uv run --locked ruff check scripts tests src
 uv run --locked mypy src scripts tests/contract/comparison.py
+uv run --locked python scripts/check_file_limits.py
 ```
 
 Windows 当前主机临时目录有账户权限差异时，按 [基线复现](docs/versions/v1/contract-baseline.md) 指定项目内独立 `--basetemp`。真实数据库探针测试需要专用测试容器和显式环境开关；完整已验证结果见阶段报告。
 
 当前没有 Python HTTP 服务启动命令；旧 NestJS 的隔离构建、采集、测试和停止步骤见 [契约基线复现](docs/versions/v1/contract-baseline.md)。后续服务命令必须在对应实现完成并实测后补齐。
+
+配置保留旧 `POSTGRES_*`、`MONGO_URI`、`SNOWFLAKE_*`、`PORT` 名称，见 [.env.example](.env.example)。显式调用 `Settings()` 时读取进程环境；需要 dotenv 时显式传 `Settings(_env_file=...)`。模块导入不读取配置、不建立连接。默认端口 8000；连接值是开发占位。每个活动进程须分配唯一 worker ID，并共享相同 epoch；进程内共享同一生成器。时间回拨或单毫秒超过 4096 个 ID 时明确失败，部署与重试说明见 [阶段报告](docs/versions/v1/task-2-report.md)。

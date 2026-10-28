@@ -86,6 +86,10 @@ v1 的 `documents` 同时访问双库并需要补偿，使用这四个职责目�
 
 跨模块只依赖公开应用接口、协议或事件，不导入别人的私有仓储。核心业务对象不含 ORM/Pydantic/SDK 类型。`core/` 不得逐渐变成承载所有业务的 `common`，不建立万能 `utils.py` 或全能 BaseService。
 
+v1 Task 2 已将 `Clock/SystemClock` 放在 `core/clock.py`，轻量 `DocumentId` 放在 `core/identifiers.py`，避免 ID 基础设施反向依赖业务包。文档数据、命令、纯文本规则分别位于 `domain/document.py`、`commands.py`、`text_metrics.py`；应用层的异步 `DocumentStore` 只定义存储端口。不可变 `UpdateDocumentCommand.changes` 保留显式 null，`DocumentMutation.provided_fields` 必须沿用到写入器；不能按新旧内容相等与否推断版本动作。
+
+`text_metrics` 保留原 JS 的空白集合和 UTF-16 单元语义，摘要截断可能得到未配对代理字符。Task 3 的 BSON 映射必须将这种字符按原 Node UTF-8 写入行为替换为 U+FFFD；Task 6 独立保证 JSON 转义兼容。不要把数据库编码清洗混入领域规则，也不能用 UTF-8 的 `errors="replace"` 生成问号来替代。
+
 ## 数据与客户端约束
 
 - SQLAlchemy AsyncSession 按请求/任务独立创建；禁止多个并发协程共享一个 session。用例明确拥有提交/回滚边界。

@@ -1,6 +1,6 @@
 # v1：文档与工程基线规格
 
-总体方向已接受。来源：旧后端 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；接口字段和副作用详见 [v1 契约](../../contracts/v1.md)。Task 1 的工程工具与原版基线已完成，FastAPI 业务实现待 Task 2–7。
+总体方向已接受。来源：旧后端 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；接口字段和副作用详见 [v1 契约](../../contracts/v1.md)。Task 1 基线、Task 2 领域与基础设施原语均已完成验证和审查；业务闭环待 Task 3–7。
 
 ## 目标与边界
 
@@ -30,6 +30,8 @@
 类型边界：`DocumentId` 为字符串 NewType；`DocumentFieldValue = str | int | bool | None`；changes 为 `Mapping[str, DocumentFieldValue]`；JSON/持久化映射在 API/infrastructure 中进行。领域对象不依赖 FastAPI、Pydantic 或 SQLAlchemy。
 
 配置保留 POSTGRES_*、MONGO_URI、SNOWFLAKE_WORKER_ID、SNOWFLAKE_OFFSET、PORT 名称，新增测试/日志配置需在样例与 README 说明。worker ID 分配和时钟回拨策略必须测试，不能在生产多实例共用固定 worker ID。
+
+Task 2 已明确的共享接口与限制见 [阶段报告](task-2-report.md)。Document/Detail/Page 为 frozen dataclass，分页 items 为元数据 tuple；纯领域不做 HTTP 校验/强制数值外键。Settings 默认不隐式读取 `.env`。雪花生成器仅保证同一实例内的序列状态，部署必须保证活动进程 worker 唯一；不把此阶段单元测试当作完整部署验收。
 
 ## 持久化和一致性
 

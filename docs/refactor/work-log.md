@@ -31,3 +31,17 @@
 - 本轮旧服务PID12852与两个专用测试容器已停止，命名卷和.local源副本/日志/备份保留；没有删除材料或旧数据卷。
 - 下一项：Task2领域规则、配置、ID与规模门禁。v1尚未验收，保持v1分支，main未合并、无远端推送。
 - 最终文档/工作区复核：20个Markdown、78个本地链接、0失效链接/围栏错误；AGENTS30行；旧后端与前端工作区均干净。Task1提交后以Git实际HEAD核验提交标识，不在提交内自引用SHA。
+
+## 2026-10-28 · v1 Task 2：领域规则、配置、ID 与规模门禁
+
+- 开始前HEAD：458f5528a3ce16020ab70661f2b84ceda0a19102，分支v1，工作区干净；本轮只执行计划Task2，未合并main、未推送。逐项需求与实现见 [阶段报告](../versions/v1/task-2-report.md)。
+- 新增core配置/错误/时钟/ID类型与生成器；documents按领域数据、命令、纯文本规则、应用存储端口拆分，没有路由/SQL/Mongo实现。只建立本阶段需要的包。
+- 对固定旧版编译产物做无需HTTP/数据库的纯方法探测，确认BOM/NEL/中文标点、UTF-16半代理摘要和worker0/1023别名行为。首次Snowflake探测使用模块对象而非default构造器失败，修正导入后取得真实向量；未改参考源码或历史快照。
+- TDD：领域缺模块时2个收集错误→41通过；配置/ID缺模块时2个收集错误→32通过；检查器缺脚本时10失败→10通过。保留PATCH显式字段不可变快照；查询status任意整数与page范围分开；雪花回拨/序列耗尽失败且不修改已用状态。
+- D016–D018记录文本编码边界、worker修正与显式配置加载；轻量identifiers防止核心反向依赖业务；.env.example从Task6提前。记录后续BSON必须替换U+FFFD、HTTP单独处理转义、部署worker唯一且无跨重启高水位保证。
+- 实际完整测试：`.venv/Scripts/python.exe -m pytest -q --basetemp=.local/pytest-runs/task2-all-009 --cov=knowledge_hub --cov-report=term-missing` → **113 passed、1 skipped、0 failed**；跳过为未启用的旧库探针。当前src语句+分支覆盖96.68%，现有85%门禁通过，不代表未实现业务路径通过。
+- 实际静态门禁：Ruff format最终只读60文件通过；Ruff check通过；mypy strict src/scripts 27文件无问题；文件门禁27文件，最长105/300行，新领域commands84行。300/301、末行、不同换行、坏编码、链接和缺目录均有测试。
+- 单次独立只读代码审查：无Critical/Important/Minor；reviewer自行跑领域/配置/ID72通过、1项dotenv写文件测试未选中，格式/lint/行数/diff通过。完整测试/coverage/mypy由主执行者运行；没有需要修复或二次审查的问题。未验收边界逐项保留到Task3–7，不降低v1出口要求。
+- 更新README、架构、规范、决策、契约、规格、计划、status与报告，下一项Task3：真实双库读取、迁移、BSON映射、锁及操作日志。仍无Python HTTP服务、差分、完整恢复/E2E/CI或v1验收。
+- 本轮未启动任何HTTP/数据库服务；只读compose ps确认两个kh-fastapi-v1-test容器均Exited(0)，卷保留。旧后端与前端Git工作区均干净；未修改全局safe.directory、未触碰旧卷。
+- 交接文档复核：20个Markdown、82个本地链接、0失效/围栏错误；AGENTS保持30行。本阶段本地提交信息：`feat(v1): add domain rules and core quality gates`；实际提交SHA在提交后用Git核对，避免文档自引用。Git差异复核后提交。
