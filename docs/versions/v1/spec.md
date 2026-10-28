@@ -1,6 +1,6 @@
 # v1：文档与工程基线规格
 
-总体方向已接受。来源：旧后端 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；接口字段和副作用详见 [v1 契约](../../contracts/v1.md)。本版尚未开始实现。
+总体方向已接受。来源：旧后端 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；接口字段和副作用详见 [v1 契约](../../contracts/v1.md)。Task 1 的工程工具与原版基线已完成，FastAPI 业务实现待 Task 2–7。
 
 ## 目标与边界
 
@@ -21,7 +21,7 @@
 
 ## API 与核心类型
 
-实现 [v1 契约](../../contracts/v1.md) 中五个 `/documents` 接口。外部保持 camelCase、字符串 ID、原分页封装和错误；POST 成功状态按原版运行结果固定，当前源码推导为 201。
+实现 [v1 契约](../../contracts/v1.md) 中五个 `/documents` 接口。外部保持 camelCase、字符串 ID、原分页封装和错误；POST 成功状态已由原版运行确认为 201。
 
 内部 `Document` 为不可直接序列化的领域数据；`DocumentDetail` 组合 Document 与 content；`DocumentPage` 包含 items、total、page、page_size。`CreateDocumentCommand` 表达创建输入，`UpdateDocumentCommand` 使用 `changes` 字典保存显式提交字段，必须区分 null 与未传。纯变换返回 `DocumentMutation(target: DocumentDetail, provided_fields: frozenset[str])`，字段集合使用内部 snake_case，一直保留到持久化步骤。
 

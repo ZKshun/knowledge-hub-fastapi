@@ -1,0 +1,120 @@
+{
+  "request": {
+    "method": "PATCH",
+    "path": "/documents/{minimal}",
+    "body": {
+      "title": "ignored"
+    }
+  },
+  "response": {
+    "status": 404,
+    "contentType": "application/json; charset=utf-8",
+    "body": {
+      "message": "Document 373750868119416832 not found",
+      "error": "Not Found",
+      "statusCode": 404
+    }
+  },
+  "state": {
+    "postgres": [
+      {
+        "id": "373750868119416832",
+        "title": "Contract Alpha revised",
+        "content_id": "6ae1b31e6d92a84ddc10bcd0",
+        "summary": "explicit summary",
+        "category_id": null,
+        "team_id": null,
+        "author_id": null,
+        "cover_image": null,
+        "tags": null,
+        "status": 0,
+        "remark": null,
+        "view_count": 0,
+        "like_count": 0,
+        "comment_count": 0,
+        "favourite_count": 0,
+        "word_count": 5,
+        "publish_time": "2026-10-28T08:32:31.313000",
+        "is_public": false,
+        "created_at": "2026-10-28T08:32:30.954948",
+        "updated_at": "2026-10-28T08:32:31.472206",
+        "create_by": null,
+        "update_by": null,
+        "deleted": true
+      }
+    ],
+    "mongo": [
+      {
+        "_id": "6ae1b31e6d92a84ddc10bcd0",
+        "documentId": "373750868119416832",
+        "content": "\u65b0\u6b63\u6587 updated content",
+        "contentLength": 19,
+        "contentSummary": "\u65b0\u6b63\u6587 updated content",
+        "version": 3,
+        "deleted": true,
+        "createdAt": "2026-10-28T08:32:30.919000",
+        "updatedAt": "2026-10-28T08:32:31.477000"
+      }
+    ]
+  },
+  "normalized": {
+    "request": {
+      "method": "PATCH",
+      "path": "/documents/{minimal}",
+      "body": {
+        "title": "ignored"
+      }
+    },
+    "response": {
+      "status": 404,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "message": "Document @document:1 not found",
+        "error": "Not Found",
+        "statusCode": 404
+      }
+    },
+    "state": {
+      "postgres": [
+        {
+          "id": "@document:1",
+          "title": "Contract Alpha revised",
+          "content_id": "@content:1",
+          "summary": "explicit summary",
+          "category_id": null,
+          "team_id": null,
+          "author_id": null,
+          "cover_image": null,
+          "tags": null,
+          "status": 0,
+          "remark": null,
+          "view_count": 0,
+          "like_count": 0,
+          "comment_count": 0,
+          "favourite_count": 0,
+          "word_count": 5,
+          "publish_time": "@time:15;precision=6;timezone=naive",
+          "is_public": false,
+          "created_at": "@time:2;precision=6;timezone=naive",
+          "updated_at": "@time:21;precision=6;timezone=naive",
+          "create_by": null,
+          "update_by": null,
+          "deleted": true
+        }
+      ],
+      "mongo": [
+        {
+          "_id": "@content:1",
+          "documentId": "@document:1",
+          "content": "\u65b0\u6b63\u6587 updated content",
+          "contentLength": 19,
+          "contentSummary": "\u65b0\u6b63\u6587 updated content",
+          "version": 3,
+          "deleted": true,
+          "createdAt": "@time:3;precision=6;timezone=naive",
+          "updatedAt": "@time:22;precision=6;timezone=naive"
+        }
+      ]
+    }
+  }
+}

@@ -1,0 +1,162 @@
+{
+  "request": {
+    "method": "PATCH",
+    "path": "/documents/{minimal}",
+    "body": {
+      "status": 1
+    }
+  },
+  "response": {
+    "status": 200,
+    "contentType": "application/json; charset=utf-8",
+    "body": {
+      "id": "373750868119416832",
+      "title": "Contract Alpha revised",
+      "contentId": "6ae1b31e6d92a84ddc10bcd0",
+      "summary": "explicit summary",
+      "categoryId": null,
+      "teamId": null,
+      "authorId": null,
+      "coverImage": null,
+      "tags": null,
+      "status": 1,
+      "remark": null,
+      "viewCount": 0,
+      "likeCount": 0,
+      "commentCount": 0,
+      "favouriteCount": 0,
+      "wordCount": 5,
+      "publishTime": "2026-10-28T08:32:31.313Z",
+      "isPublic": false,
+      "createdAt": "2026-10-28T08:32:30.954Z",
+      "updatedAt": "2026-10-28T08:32:31.318Z",
+      "createBy": null,
+      "updateBy": null,
+      "deleted": false,
+      "content": "\u65b0\u6b63\u6587 updated content"
+    }
+  },
+  "state": {
+    "postgres": [
+      {
+        "id": "373750868119416832",
+        "title": "Contract Alpha revised",
+        "content_id": "6ae1b31e6d92a84ddc10bcd0",
+        "summary": "explicit summary",
+        "category_id": null,
+        "team_id": null,
+        "author_id": null,
+        "cover_image": null,
+        "tags": null,
+        "status": 1,
+        "remark": null,
+        "view_count": 0,
+        "like_count": 0,
+        "comment_count": 0,
+        "favourite_count": 0,
+        "word_count": 5,
+        "publish_time": "2026-10-28T08:32:31.313000",
+        "is_public": false,
+        "created_at": "2026-10-28T08:32:30.954948",
+        "updated_at": "2026-10-28T08:32:31.318625",
+        "create_by": null,
+        "update_by": null,
+        "deleted": false
+      }
+    ],
+    "mongo": [
+      {
+        "_id": "6ae1b31e6d92a84ddc10bcd0",
+        "documentId": "373750868119416832",
+        "content": "\u65b0\u6b63\u6587 updated content",
+        "contentLength": 19,
+        "contentSummary": "\u65b0\u6b63\u6587 updated content",
+        "version": 3,
+        "deleted": false,
+        "createdAt": "2026-10-28T08:32:30.919000",
+        "updatedAt": "2026-10-28T08:32:31.273000"
+      }
+    ]
+  },
+  "normalized": {
+    "request": {
+      "method": "PATCH",
+      "path": "/documents/{minimal}",
+      "body": {
+        "status": 1
+      }
+    },
+    "response": {
+      "status": 200,
+      "contentType": "application/json; charset=utf-8",
+      "body": {
+        "id": "@document:1",
+        "title": "Contract Alpha revised",
+        "contentId": "@content:1",
+        "summary": "explicit summary",
+        "categoryId": null,
+        "teamId": null,
+        "authorId": null,
+        "coverImage": null,
+        "tags": null,
+        "status": 1,
+        "remark": null,
+        "viewCount": 0,
+        "likeCount": 0,
+        "commentCount": 0,
+        "favouriteCount": 0,
+        "wordCount": 5,
+        "publishTime": "@time:13;precision=3;timezone=Z",
+        "isPublic": false,
+        "createdAt": "@time:1;precision=3;timezone=Z",
+        "updatedAt": "@time:14;precision=3;timezone=Z",
+        "createBy": null,
+        "updateBy": null,
+        "deleted": false,
+        "content": "\u65b0\u6b63\u6587 updated content"
+      }
+    },
+    "state": {
+      "postgres": [
+        {
+          "id": "@document:1",
+          "title": "Contract Alpha revised",
+          "content_id": "@content:1",
+          "summary": "explicit summary",
+          "category_id": null,
+          "team_id": null,
+          "author_id": null,
+          "cover_image": null,
+          "tags": null,
+          "status": 1,
+          "remark": null,
+          "view_count": 0,
+          "like_count": 0,
+          "comment_count": 0,
+          "favourite_count": 0,
+          "word_count": 5,
+          "publish_time": "@time:15;precision=6;timezone=naive",
+          "is_public": false,
+          "created_at": "@time:2;precision=6;timezone=naive",
+          "updated_at": "@time:16;precision=6;timezone=naive",
+          "create_by": null,
+          "update_by": null,
+          "deleted": false
+        }
+      ],
+      "mongo": [
+        {
+          "_id": "@content:1",
+          "documentId": "@document:1",
+          "content": "\u65b0\u6b63\u6587 updated content",
+          "contentLength": 19,
+          "contentSummary": "\u65b0\u6b63\u6587 updated content",
+          "version": 3,
+          "deleted": false,
+          "createdAt": "@time:3;precision=6;timezone=naive",
+          "updatedAt": "@time:12;precision=6;timezone=naive"
+        }
+      ]
+    }
+  }
+}
