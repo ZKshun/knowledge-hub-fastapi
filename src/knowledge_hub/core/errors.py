@@ -21,6 +21,12 @@ class InvalidDocumentChange(ApplicationError, ValueError):
     pass
 
 
+class DocumentOperationPending(ApplicationError):
+    def __init__(self, document_id: DocumentId) -> None:
+        self.document_id = document_id
+        super().__init__(f"Document {document_id} has an unresolved operation")
+
+
 class IdGenerationError(ApplicationError):
     pass
 

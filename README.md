@@ -6,7 +6,7 @@
 
 ## 当前状态
 
-已完成 **v1 Task 1–2：原版契约基线、领域规则、配置、ID 与规模门禁**，实现、测试和独立审查通过。75 份原版 HTTP/双库快照保留；当前完整测试 113 通过、1 项数据库探针跳过。下一项为 Task 3；FastAPI 业务接口及双库实现仍待 Task 3–7。这里的业务闭环描述最终目标，不表示全部功能已经可用。
+已完成 **v1 Task 1–3**：原版基线、领域/配置/ID/门禁，以及兼容迁移、双库读取、文档锁和操作日志，均已验证并通过独立审查。75 份原版 HTTP/双库快照保留；当前完整测试 **133 通过、无跳过**。下一项Task 4；写入恢复、FastAPI 业务接口和完整验收仍待 Task 4–7。这里的业务闭环描述最终目标，不表示全部功能已经可用。
 
 新会话从 [AGENTS.md](AGENTS.md) 开始，随后读取 [当前进度与下一步](docs/refactor/status.md) 和 [开发 SOP](docs/refactor/agent-sop.md)。
 
@@ -64,7 +64,7 @@ Python 仓库位于本目录；同级 `../knowledge-hub-backend` 与 `../knowled
 | Agent 开发、验证、恢复和交接 | [开发 SOP](docs/refactor/agent-sop.md) |
 | 已确认的规则及其来源 | [决策记录](docs/refactor/decisions.md) |
 | v1 的具体工作 | [规格](docs/versions/v1/spec.md)、[实施计划](docs/superpowers/plans/2026-10-28-v1.md) |
-| 本阶段做了哪些需求、如何完成 | [Task 2 需求与实现报告](docs/versions/v1/task-2-report.md)、[Task 1 报告](docs/versions/v1/task-1-report.md) |
+| 本阶段做了哪些需求、如何完成 | [Task 3 需求与实现报告](docs/versions/v1/task-3-report.md)、[Task 2 报告](docs/versions/v1/task-2-report.md)、[Task 1 报告](docs/versions/v1/task-1-report.md) |
 | 历次工作与证据 | [工作日志](docs/refactor/work-log.md) |
 
 ## 运行与验证
@@ -76,11 +76,13 @@ uv sync --locked --all-groups --link-mode=copy
 uv run --locked pytest tests/unit tests/contract -q
 uv run --locked ruff format --check .
 uv run --locked ruff check scripts tests src
-uv run --locked mypy src scripts tests/contract/comparison.py
+uv run --locked mypy src scripts migrations tests/contract/comparison.py
 uv run --locked python scripts/check_file_limits.py
 ```
 
 Windows 当前主机临时目录有账户权限差异时，按 [基线复现](docs/versions/v1/contract-baseline.md) 指定项目内独立 `--basetemp`。真实数据库探针测试需要专用测试容器和显式环境开关；完整已验证结果见阶段报告。
+
+Task 3 真实数据库验证使用 `KH_RUN_STORAGE_DB_TESTS=1`，旧库探针使用 `KH_RUN_LEGACY_DB_TESTS=1`；两个开关均启用并启动专用容器时，本轮完整测试133项全部通过。具体复现命令、临时schema/集合隔离、迁移拒绝已有无版本表的规则见 [Task 3 报告](docs/versions/v1/task-3-report.md)。不要把未启用数据库测试的本地快速检查当作v1验收。
 
 当前没有 Python HTTP 服务启动命令；旧 NestJS 的隔离构建、采集、测试和停止步骤见 [契约基线复现](docs/versions/v1/contract-baseline.md)。后续服务命令必须在对应实现完成并实测后补齐。
 

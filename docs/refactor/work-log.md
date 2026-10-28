@@ -45,3 +45,18 @@
 - 更新README、架构、规范、决策、契约、规格、计划、status与报告，下一项Task3：真实双库读取、迁移、BSON映射、锁及操作日志。仍无Python HTTP服务、差分、完整恢复/E2E/CI或v1验收。
 - 本轮未启动任何HTTP/数据库服务；只读compose ps确认两个kh-fastapi-v1-test容器均Exited(0)，卷保留。旧后端与前端Git工作区均干净；未修改全局safe.directory、未触碰旧卷。
 - 交接文档复核：20个Markdown、82个本地链接、0失效/围栏错误；AGENTS保持30行。本阶段本地提交信息：`feat(v1): add domain rules and core quality gates`；实际提交SHA在提交后用Git核对，避免文档自引用。Git差异复核后提交。
+
+## 2026-10-28 · v1 Task 3：双库读取、迁移、锁和操作日志
+
+- 开始前HEAD为8befa08758b21dc80559d06c9441573378fa7fe2，v1干净；只执行Task3。使用既有专属checkout与Windows账本；逐项需求/实现/证据见[阶段报告](../versions/v1/task-3-report.md)。
+- 启动前核对两个kh-fastapi-v1-test容器均Exited(0)，随后compose up -d --wait均Healthy；未启动旧HTTP或删除卷。新测试固定本机专用端口/测试DB，再用UUID SQL schema和Mongo集合隔离。
+- 新增SQLA Async/PyMongo Async客户端、SQL行/BSON记录、映射、读取仓储、读store、session文档锁、操作日志、冻结Alembic迁移与Mongo索引命令。保持原23列类型、默认值、null、ObjectId关联及字符串大ID；BSON边界与原044快照对比通过。
+- TDD：缺客户端模块时读取/迁移及锁/日志测试失败；实现后首轮18项真实数据库测试通过。补20并发详情测试稳定复现共池饥饿（3秒超时），根因为持锁/等待锁耗尽查询所需池；分离lock_engine后通过，新增D019记录两池最多30连接/进程与双池关闭责任。
+- 已验证升级/降级/升级与幂等、原列型/默认/唯一非空、无版本已有表拒绝、分页/组合过滤/ILIKE/软删除/缺正文、索引幂等/唯一、同文档串行/不同文档并行、锁异常/持有者取消/等待者取消/超时释放、prepared独立持久和metadata/completed同事务可见及回滚保护；共19项Task3真实库测试。
+- 类型检查首轮发现过滤表达式列表推断过窄及BaseSettings的_env_file伪错误；补显式ColumnElement类型，并核对已安装官方Pydantic插件源码后启用pydantic.mypy，未添加宽泛ignore。初次迁移import排序问题已修正。
+- 实际完整命令：KH_RUN_STORAGE_DB_TESTS=1、KH_RUN_LEGACY_DB_TESTS=1，`.venv/Scripts/python.exe -m pytest -q --basetemp=.local/pytest-runs/task3-all-007 --cov=knowledge_hub --cov-report=term-missing --tb=short` → **133 passed、0 skipped、0 failed**；当前src语句+分支95.10%，85%门禁通过。尚未实现的恢复/HTTP/E2E不记作通过。
+- Ruff format只读85文件、Ruff check通过；mypy strict src/scripts/migrations 46文件通过；行数门禁44文件，最长105行；uv lock --check --offline解析45依赖通过；索引CLI --help与Alembic history入口通过。
+- 只读审计临时SQL schema/Mongo集合均0残留。完整回归包含既有legacy探针按原流程重置专用public表/document_content合成数据；新测试不改原表结构，75快照与参考仓库不改。旧前后端Git工作区均干净。
+- 单次独立只读审查无Critical/Important/Minor；reviewer实际核对源/测试、Ruff、52文件格式、BSON代理字符边界及staged diff，无需修复。133完整测试/coverage/mypy由主执行者运行，未冒称reviewer重跑真实库。
+- README/status/规格/契约/架构/决策/计划/报告/日志已同步，下一项Task4。两个专用测试容器已stop并核对Exited(0)，卷保留。本轮提交信息`feat(v1): add storage reads migrations and operation journal`；最终SHA提交后由Git核对。完整v1仍implementing，无main合并或推送。
+- 最终文档复核21个Markdown、88个本地链接、0失效/围栏错误；AGENTS保持30物理行。Git差异空白检查后执行本地提交。

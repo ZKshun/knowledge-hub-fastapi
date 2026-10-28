@@ -50,6 +50,7 @@ max-complexity = 10
 [tool.mypy]
 python_version = "3.12"
 strict = true
+plugins = ["pydantic.mypy"]
 
 [tool.coverage.run]
 source = ["knowledge_hub"]

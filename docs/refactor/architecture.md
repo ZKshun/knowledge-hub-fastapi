@@ -95,6 +95,7 @@ v1 Task 2 已将 `Clock/SystemClock` 放在 `core/clock.py`，轻量 `DocumentId
 - SQLAlchemy AsyncSession 按请求/任务独立创建；禁止多个并发协程共享一个 session。用例明确拥有提交/回滚边界。
 - MongoDB 使用 PyMongo Async。正文的持久化字段保持原 camelCase；应用内部由映射转换。
 - 客户端由 lifespan 创建和关闭，不在模块 import 阶段连网，不每个请求新建连接池。
+- v1 Task 3 的 PostgresDatabase 已分离业务engine与lock_engine：持有/等待session锁不占业务池；每池默认5+10连接、单进程两池最多30，部署必须按进程数预算。DocumentLock必须接lock_engine，不能因“复用连接”重新引入已复现的连接池饥饿；close需释放两池。
 - PostgreSQL 迁移用 Alembic；Mongo 索引、ES mapping、Neo4j 约束、MQ 拓扑用有版本、可重复执行的初始化命令维护。
 - 首轮保留所有存储职责。v1 只启动 PostgreSQL、MongoDB；其余随版本加入，不要求 v1 配齐模型、图谱和队列。
 - 阻塞 SDK 封装在线程边界；CPU 密集解析进入受控 Worker；不能仅给同步函数加 `async` 就宣称非阻塞。
@@ -110,6 +111,8 @@ commit 抛错不等于 SQL 确定回滚：提交可能成功而响应丢失。�
 v3 在 PostgreSQL 增加事务 Outbox：业务状态和事件同事务提交，独立发布器发送；重复发布由消费者幂等处理。事件带任务 ID、文档 ID 和内容版本。索引任务读取最新文档状态，过期事件不能把已归档/删除内容重新暴露。
 
 新可靠性表和内部状态字段属于添加式扩展，不改变原有业务表、正文集合和 HTTP 契约。现有数据导入、已有库 Alembic baseline 必须使用明确操作流程，不在启动时自动 stamp 或覆盖表。
+
+Task 3 已实现：独立持久prepare、新session查询pending、同文档单一未完成操作部分唯一索引、调用者SQL事务内mark_completed。get在session锁内检查pending再读双库；恢复未实现前显式拒绝未决详情。create/mutate/soft_delete及恢复协调仍属Task4/5，不能用当前日志表或读适配器声称可靠写入闭环完成。获取新锁不证明旧业务backend事务已经结束，后续未知COMMIT核验必须覆盖业务连接身份与结束条件。
 
 ## 问答与流式复用
 
