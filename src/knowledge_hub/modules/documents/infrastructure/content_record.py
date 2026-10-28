@@ -18,6 +18,7 @@ class DocumentContentRecord(TypedDict):
     createdAt: datetime
     updatedAt: datetime
     operationId: NotRequired[str]
+    creationFence: NotRequired[bool]
 
 
 @dataclass(frozen=True, slots=True, kw_only=True)

@@ -27,6 +27,19 @@ class DocumentOperationPending(ApplicationError):
         super().__init__(f"Document {document_id} has an unresolved operation")
 
 
+class DocumentAlreadyExists(ApplicationError):
+    def __init__(self, document_id: DocumentId) -> None:
+        super().__init__(f"Document {document_id} already exists")
+
+
+class OperationRecoveryError(ApplicationError):
+    pass
+
+
+class InvalidDocumentContent(ApplicationError):
+    pass
+
+
 class IdGenerationError(ApplicationError):
     pass
 

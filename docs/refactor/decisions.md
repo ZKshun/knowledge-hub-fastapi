@@ -23,6 +23,9 @@
 | D017 | 2026-10-28 | 实施默认值/Task 2 原版探测 | 雪花 ID 保留 41/10/12 位布局、epoch 和十进制字符串；worker 0/1023 使用真实位值，修正旧库别名错误；回拨/序列耗尽显式报错，部署负责活动进程 worker 唯一性，不宣称跨重启有持久高水位 |
 | D018 | 2026-10-28 | 实施默认值/Task 2 | Settings 不在导入时实例化，默认不读取 dotenv；显式构造时读取旧环境变量，dotenv 必须显式指定。凭据使用 SecretStr；连接客户端仍由后续 lifespan 装配 |
 | D019 | 2026-10-28 | 实施默认值/Task 3 实测 | PostgreSQL session文档锁使用独立lock_engine连接池，业务查询/事务使用engine池；20并发详情已证明共池饥饿。每池默认5+10，单进程合计最多30连接，部署须预算并关闭两池 |
+| D020 | 2026-10-28 | 实施默认值/Task 4 实测 | 使用prepared日志行FOR UPDATE作为SQL事务结束屏障：写入器从Mongo前持有到metadata/completed提交，恢复先重取文档锁再用新session取日志行锁、核对completed/元数据；超时或SQL不可用时保留未决状态，不猜回滚 |
+| D021 | 2026-10-28 | 实施默认值/Task 4 故障协议 | 创建补偿清空自有Mongo正文并保留预分配_id、operationId、version1、deleted=true、creationFence=true的空标记，条件匹配operation/version；替代物理删除以阻止迟到insert重建孤立正文。标记不作为业务文档/响应，不自动清理，代价是少量持久内部行 |
+| D022 | 2026-10-28 | 实施默认值/Task 4 审查修复 | 外部BIGINT字符串使用绑定Text参数后由PostgreSQL原生CAST解析，覆盖外键/操作者写入、筛选、路由查询/pending门禁及锁键规范化；禁止Python int/strip改变PG接受集合。内部生成或从数据库读取的规范十进制ID仍可绑定数值 |
 
 ## 变更规则
 

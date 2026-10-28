@@ -4,25 +4,12 @@ from sqlalchemy import exists, select, update
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from knowledge_hub.core.identifiers import DocumentId
-from knowledge_hub.modules.documents.infrastructure.mappers import as_utc
+from knowledge_hub.integrations.postgres.identifiers import bigint_parameter
+from knowledge_hub.modules.documents.infrastructure.mappers import as_utc, to_operation_record
 from knowledge_hub.modules.documents.infrastructure.operation_row import OperationRow
 from knowledge_hub.modules.documents.infrastructure.operation_types import OperationRecord
 
 _PENDING_STATES = ("prepared", "compensation_pending")
-
-
-def _record(row: OperationRow) -> OperationRecord:
-    return OperationRecord(
-        operation_id=row.operation_id,
-        document_id=DocumentId(str(row.document_id)),
-        operation_type=row.operation_type,
-        state=row.state,
-        expected_version=row.expected_version,
-        snapshot=row.snapshot,
-        last_error=row.last_error,
-        created_at=as_utc(row.created_at),
-        updated_at=as_utc(row.updated_at),
-    )
 
 
 class OperationJournal:
@@ -50,7 +37,7 @@ class OperationJournal:
     async def get(self, operation_id: str) -> OperationRecord | None:
         async with self.sessions() as session:
             row = await session.get(OperationRow, operation_id)
-            return _record(row) if row else None
+            return to_operation_record(row) if row else None
 
     async def has_pending(self, document_id: DocumentId) -> bool:
         async with self.sessions() as session:
@@ -58,7 +45,7 @@ class OperationJournal:
                 await session.scalar(
                     select(
                         exists().where(
-                            OperationRow.document_id == int(document_id),
+                            OperationRow.document_id == bigint_parameter(document_id),
                             OperationRow.state.in_(_PENDING_STATES),
                         )
                     )
@@ -75,7 +62,7 @@ class OperationJournal:
                 .order_by(OperationRow.created_at, OperationRow.operation_id)
                 .limit(limit)
             )
-            return [_record(row) for row in rows]
+            return [to_operation_record(row) for row in rows]
 
     async def mark_completed(self, session: AsyncSession, operation_id: str) -> None:
         # Caller owns this transaction, shared with the metadata write.

@@ -20,3 +20,10 @@ class OperationRecord:
     last_error: str | None
     created_at: datetime
     updated_at: datetime
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class RecoveryReport:
+    completed: int = 0
+    compensated: int = 0
+    failed: int = 0

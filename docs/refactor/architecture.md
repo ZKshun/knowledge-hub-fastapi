@@ -94,6 +94,7 @@ v1 Task 2 已将 `Clock/SystemClock` 放在 `core/clock.py`，轻量 `DocumentId
 
 - SQLAlchemy AsyncSession 按请求/任务独立创建；禁止多个并发协程共享一个 session。用例明确拥有提交/回滚边界。
 - MongoDB 使用 PyMongo Async。正文的持久化字段保持原 camelCase；应用内部由映射转换。
+- 外部BIGINT文本通过integrations/postgres/identifiers.bigint_parameter绑定为Text再CAST BIGINT，由数据库决定合法语法/范围和错误；不要用Python int或strip先处理。文档锁也先按PG规范化键，使16与0x10锁住同一行；内部Snowflake/DB读回ID是规范十进制数。此规则覆盖写入、查询和pending检查（D022）。
 - 客户端由 lifespan 创建和关闭，不在模块 import 阶段连网，不每个请求新建连接池。
 - v1 Task 3 的 PostgresDatabase 已分离业务engine与lock_engine：持有/等待session锁不占业务池；每池默认5+10连接、单进程两池最多30，部署必须按进程数预算。DocumentLock必须接lock_engine，不能因“复用连接”重新引入已复现的连接池饥饿；close需释放两池。
 - PostgreSQL 迁移用 Alembic；Mongo 索引、ES mapping、Neo4j 约束、MQ 拓扑用有版本、可重复执行的初始化命令维护。
@@ -104,7 +105,9 @@ v1 Task 2 已将 `Clock/SystemClock` 放在 `core/clock.py`，轻量 `DocumentId
 
 v1 使用跨库操作日志记录创建、修改、软删除的步骤、目标版本及补偿状态；记录与 PostgreSQL 元数据在同一 SQL 事务中维护可提交部分，显式处理 SQL 确定回滚后的 Mongo 补偿。操作日志包含恢复所需的有限快照并控制访问，不能把完整正文写入普通日志。
 
-commit 抛错不等于 SQL 确定回滚：提交可能成功而响应丢失。在线异常处理和重启恢复均须结束/丢弃旧连接，重新取得同文档锁，确认旧事务已结束，再用新连接核验 completed 状态和元数据。已提交则保留 Mongo；确认未提交才补偿。数据库不可用或旧事务未确认结束时保留待恢复操作、拒绝后续同文档写入，绝不凭“查询暂未看到 completed”推断可以删除正文。
+commit抛错不等于SQL确定回滚：提交可能成功而响应丢失。在线异常与重启恢复均须结束/丢弃旧连接，重取同文档session锁，再在新SQL事务取得对应日志行的FOR UPDATE锁。写入器从Mongo前持有此行锁到metadata/completed提交，因此恢复取得行锁才证明旧业务事务已结束；随后核对completed与元数据。已提交保留Mongo，确定未提交才补偿；SQL不可用或行锁仍被旧事务持有时保留pending并阻止同文档写，绝不凭查询暂未看到completed就补偿。
+
+创建时先预分配Mongo ObjectId并在prepared快照仅保存content_id。补偿使用_id/documentId/operationId/version条件原子替换为空正文、deleted=true、creationFence=true的持久标记；不存在时upsert占住同一_id。迟到insert会因唯一_id失败，不能在SQL回滚/恢复后重建孤立正文。不得物理删除此标记或覆盖不同operation/version的正文；原API只读取未删除正文且无SQL元数据，标记不作为文档暴露。D021是内部可靠性扩展，代价为少量保留行；修改/删除补偿在Task5另证。
 
 后续实现者需在 v1 故障测试中验证进程中断、Mongo 成功但 SQL 失败、补偿失败和重试。没有恢复证据的用例不能标记完成。
 
@@ -112,7 +115,7 @@ v3 在 PostgreSQL 增加事务 Outbox：业务状态和事件同事务提交，�
 
 新可靠性表和内部状态字段属于添加式扩展，不改变原有业务表、正文集合和 HTTP 契约。现有数据导入、已有库 Alembic baseline 必须使用明确操作流程，不在启动时自动 stamp 或覆盖表。
 
-Task 3 已实现：独立持久prepare、新session查询pending、同文档单一未完成操作部分唯一索引、调用者SQL事务内mark_completed。get在session锁内检查pending再读双库；恢复未实现前显式拒绝未决详情。create/mutate/soft_delete及恢复协调仍属Task4/5，不能用当前日志表或读适配器声称可靠写入闭环完成。获取新锁不证明旧业务backend事务已经结束，后续未知COMMIT核验必须覆盖业务连接身份与结束条件。
+Task3基础与Task4创建/查询及创建恢复已实现：prepare独立提交、pending门禁、单文档pending唯一、metadata/completed同事务、行锁屏障及条件补偿均有真实库证据。get对未决详情继续显式拒绝，恢复入口单独调用；mutate/soft_delete及其完整恢复仍待Task5，HTTP待Task6。不能把创建恢复测试当作全部写入或HTTP闭环验收。
 
 ## 问答与流式复用
 

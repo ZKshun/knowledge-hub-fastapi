@@ -60,3 +60,18 @@
 - 单次独立只读审查无Critical/Important/Minor；reviewer实际核对源/测试、Ruff、52文件格式、BSON代理字符边界及staged diff，无需修复。133完整测试/coverage/mypy由主执行者运行，未冒称reviewer重跑真实库。
 - README/status/规格/契约/架构/决策/计划/报告/日志已同步，下一项Task4。两个专用测试容器已stop并核对Exited(0)，卷保留。本轮提交信息`feat(v1): add storage reads migrations and operation journal`；最终SHA提交后由Git核对。完整v1仍implementing，无main合并或推送。
 - 最终文档复核21个Markdown、88个本地链接、0失效/围栏错误；AGENTS保持30物理行。Git差异空白检查后执行本地提交。
+
+## 2026-10-28 · v1 Task 4：创建/查询与可恢复创建
+
+- 开始前HEAD：a7a28a4bf9fcfad70c7f2baa7aac1d94326484f3，v1干净；沿用专属checkout与Windows账本，本轮只做Task4。开始前113通过/20个未启用DB测试跳过；随后启动两个专用测试容器并确认Healthy，未启动旧HTTP/触碰旧卷。
+- 逐项需求与证据见[Task4报告](../versions/v1/task-4-report.md)。新增独立创建/详情/分页用例、创建计划、日志行锁屏障、协调器、恢复服务；保留原接口/表列和字符串ID。store现有create/get/page/recover_pending，修改/软删除仍待Task5。
+- TDD：用例缺模块RED→9通过；恢复实现缺失RED→16项真实双库故障通过。核对原042快照发现PyMongo接受空正文而Mongoose原创建报500，DID NOT RAISE测试RED→create-only校验GREEN；发布时间微秒123456与JS毫秒123000差异RED→GREEN。最终新增10项用例+17项双库测试。
+- D020：prepared日志行FOR UPDATE从Mongo前持有至metadata/completed提交，恢复新session取得同一行锁后才核验SQL结果。验证旧SQL事务持续持锁时，新文档锁不能触发补偿；无法核验保留pending。异常失效旧session，普通错误向调用者抛出，不隐式重放创建。
+- D021：创建补偿条件匹配_id/documentId/operationId/version，原子清空正文并保留空deleted/creationFence标记，不物理删除_id预留；真实唯一_id证明迟到insert失败。代价为少量持久内部行，不能自动清理/暴露为业务文档。未改历史75快照，后续差分须显式验证并排除内部标记，不能忽略所有deleted数据。
+- 故障验证使用真实SQL/Mongo操作和测试内边界替换：Mongo前后、SQL提交前后模拟中断并新store恢复；SQL已提交但回包丢失、业务SQL新连接真实TCP拒绝、补偿失败/重试、取消、外部operation/version保护及迟到insert。没有声称执行OS kill或停整个PG服务器；范围在阶段报告明确。
+- 实际完整命令：两个DB开关均1，`.venv/Scripts/python.exe -m pytest -q --basetemp=.local/pytest-runs/task4-all-010 --cov=knowledge_hub --cov-report=term-missing --tb=short` → **160 passed、0 skipped、0 failed**；当前src语句+分支覆盖95.05%，85%门禁通过。不代表未实现的Task5修改/删除或Task6HTTP验收。
+- Ruff format最终101文件通过；Ruff check通过；mypy strict src/scripts/migrations 55文件；行数门禁53文件最长131/300行。初轮未用import/排序问题均修正。SQL/Mongo临时schema/集合审计0残留。
+- 单次独立审查：1项Important（Python int与原PG BIGINT解析不等价）、无Critical/Minor。reviewer实际执行10项纯用例、只读PG转换探针与staged diff，未重跑修改库的完整测试。主执行者新增真实存储测试先7失败/4通过，修复为参数化Text→BIGINT SQL CAST，再增等价ID共锁；外键/操作者、路由/筛选/pending/锁均统一（D022），不只补写入一处。
+- 最终完整命令同前，basetemp为task4-final-013 → **172 passed、0 skipped、0 failed，95.12%**；Ruff format103文件/检查通过，mypy strict56文件，行数54文件最长133行，uv lock --check --offline45依赖通过。只进行一轮审查修复，未冒称reviewer复核修复后代码。
+- 最终临时SQL schema/Mongo集合0残留；两个专用测试容器均stop并核对Exited(0)，卷保留。README/架构/决策/规格/契约/计划/状态/报告/日志同步，下一Task5。参考前后端Git工作区干净；75原快照未改。提交信息`feat(v1): add recoverable document creation and queries`，实际SHA由Git核对，无main合并或远端推送。
+- 交接文档复核22个Markdown、94个本地链接、0失效/围栏错误；AGENTS保持30物理行。最终Git差异空白检查后本地提交。

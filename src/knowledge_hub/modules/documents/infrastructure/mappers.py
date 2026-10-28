@@ -1,8 +1,10 @@
 from datetime import UTC, datetime
 
 from bson import ObjectId
+from sqlalchemy.sql.elements import Cast
 
 from knowledge_hub.core.identifiers import DocumentId
+from knowledge_hub.integrations.postgres.identifiers import bigint_parameter
 from knowledge_hub.modules.documents.domain.document import Document, DocumentStatus
 from knowledge_hub.modules.documents.domain.text_metrics import (
     build_content_summary,
@@ -10,6 +12,8 @@ from knowledge_hub.modules.documents.domain.text_metrics import (
 )
 from knowledge_hub.modules.documents.infrastructure.content_record import DocumentContentRecord
 from knowledge_hub.modules.documents.infrastructure.document_row import DocumentRow
+from knowledge_hub.modules.documents.infrastructure.operation_row import OperationRow
+from knowledge_hub.modules.documents.infrastructure.operation_types import OperationRecord
 
 
 def as_utc(value: datetime) -> datetime:
@@ -23,6 +27,20 @@ def bson_string(value: str) -> str:
 
 def optional_id(value: int | None) -> str | None:
     return str(value) if value is not None else None
+
+
+def to_operation_record(row: OperationRow) -> OperationRecord:
+    return OperationRecord(
+        operation_id=row.operation_id,
+        document_id=DocumentId(str(row.document_id)),
+        operation_type=row.operation_type,
+        state=row.state,
+        expected_version=row.expected_version,
+        snapshot=row.snapshot,
+        last_error=row.last_error,
+        created_at=as_utc(row.created_at),
+        updated_at=as_utc(row.updated_at),
+    )
 
 
 def to_document(row: DocumentRow) -> Document:
@@ -50,6 +68,42 @@ def to_document(row: DocumentRow) -> Document:
         create_by=optional_id(row.create_by),
         update_by=optional_id(row.update_by),
         deleted=row.deleted,
+    )
+
+
+def _bigint(value: str | None) -> Cast[int] | None:
+    return bigint_parameter(value) if value is not None else None
+
+
+def to_row(document: Document) -> DocumentRow:
+    if document.content_id is None:
+        raise ValueError("Persisted documents require a content ID")
+    return DocumentRow(
+        id=int(document.id),
+        title=document.title,
+        content_id=document.content_id,
+        summary=document.summary,
+        category_id=_bigint(document.category_id),
+        team_id=_bigint(document.team_id),
+        author_id=_bigint(document.author_id),
+        cover_image=document.cover_image,
+        tags=document.tags,
+        status=int(document.status),
+        remark=document.remark,
+        view_count=document.view_count,
+        like_count=document.like_count,
+        comment_count=document.comment_count,
+        favourite_count=document.favourite_count,
+        word_count=document.word_count,
+        publish_time=as_utc(document.publish_time).replace(tzinfo=None)
+        if document.publish_time
+        else None,
+        is_public=document.is_public,
+        created_at=as_utc(document.created_at).replace(tzinfo=None),
+        updated_at=as_utc(document.updated_at).replace(tzinfo=None),
+        create_by=_bigint(document.create_by),
+        update_by=_bigint(document.update_by),
+        deleted=document.deleted,
     )
 
 

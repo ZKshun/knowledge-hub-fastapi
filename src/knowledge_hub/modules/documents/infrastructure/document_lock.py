@@ -2,10 +2,11 @@ import asyncio
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
 
-from sqlalchemy import text
+from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncConnection, AsyncEngine
 
 from knowledge_hub.core.identifiers import DocumentId
+from knowledge_hub.integrations.postgres.identifiers import bigint_parameter
 
 
 class DocumentLock:
@@ -16,12 +17,14 @@ class DocumentLock:
 
     @asynccontextmanager
     async def acquire(self, document_id: DocumentId) -> AsyncIterator[None]:
-        key = int(document_id)
-        if not -(1 << 63) <= key < (1 << 63):
-            raise ValueError("Document ID is outside the BIGINT lock key range")
         async with self.engine.connect() as connection:
+            key = 0
             acquired = False
             try:
+                canonical = await connection.scalar(select(bigint_parameter(document_id)))
+                if canonical is None:
+                    raise ValueError("Document ID cannot be null")
+                key = canonical
                 await connection.execute(
                     text("SELECT set_config('lock_timeout', :value, true)"),
                     {"value": f"{self.timeout_ms}ms"},

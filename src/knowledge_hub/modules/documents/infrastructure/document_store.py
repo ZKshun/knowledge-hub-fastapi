@@ -10,10 +10,13 @@ from knowledge_hub.modules.documents.infrastructure.content_repository import Co
 from knowledge_hub.modules.documents.infrastructure.document_lock import DocumentLock
 from knowledge_hub.modules.documents.infrastructure.metadata_repository import MetadataRepository
 from knowledge_hub.modules.documents.infrastructure.operation_journal import OperationJournal
+from knowledge_hub.modules.documents.infrastructure.operation_types import RecoveryReport
+from knowledge_hub.modules.documents.infrastructure.recovery import RecoveryService
+from knowledge_hub.modules.documents.infrastructure.write_coordinator import WriteCoordinator
 
 
 class PostgresMongoDocumentStore:
-    """Task 3 read adapter; write-side methods are added with recovery in Tasks 4–5."""
+    """Read and recoverable-create adapter; mutation methods arrive in Task 5."""
 
     def __init__(
         self, postgres: PostgresDatabase, collection: AsyncCollection[DocumentContentRecord]
@@ -23,6 +26,14 @@ class PostgresMongoDocumentStore:
         self.contents = ContentRepository(collection)
         self.lock = DocumentLock(postgres.lock_engine)
         self.journal = OperationJournal(postgres.sessions)
+        self.writer = WriteCoordinator(postgres, collection)
+        self.recovery = RecoveryService(postgres, collection)
+
+    async def create(self, draft: DocumentDetail) -> DocumentDetail:
+        return await self.writer.create(draft)
+
+    async def recover_pending(self, *, limit: int = 100) -> RecoveryReport:
+        return await self.recovery.recover_pending(limit=limit)
 
     async def get(self, document_id: DocumentId) -> DocumentDetail | None:
         async with self.lock.acquire(document_id):
