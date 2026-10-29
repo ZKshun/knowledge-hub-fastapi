@@ -49,13 +49,14 @@
 
 ## 实现链路报告：implementation-flow-report.md
 
-每版创建独立的`docs/versions/vN/implementation-flow-report.md`，**默认一页**，按以下顺序写：
+每版创建独立的`docs/versions/vN/implementation-flow-report.md`，按用户确认的四部分写：
 
-1. 一句话说清本版已完成什么、哪些目标还没实现。
-2. 一条从用户请求到响应/副作用的主链路；简表逐项写“用户要做什么→服务怎样完成→用户看到什么”。
-3. 最多几条验证结果和未完成边界，标清历史结果与本轮运行的区别。
+1. **主要需求闭环**：本版完成什么，哪些功能仍属后续版本。
+2. **文件树**：按职责列新增/修改文件；说明比较基准与重复夹具的数量，避免文件名淹没主线。
+3. **每项需求的实现链路**：用图标出发起、入口、模块/技术、数据或消息副作用、失败去向、结束状态；配少量文字解释。
+4. **总结**：实际验证、合并/发布状态、仍未验证的边界。
 
-代码、故障分支、全部命令和逐例证据链接到`acceptance.md`及阶段报告，概览不重复堆放。v1实例见[一页报告](../versions/v1/implementation-flow-report.md)。
+逐例命令和原始证据链接到`acceptance.md`及阶段报告，不能以图替代验证。v1实例见[交付报告](../versions/v1/implementation-flow-report.md)。
 
 ## 交接记录：handoff-YYYY-MM-DD.md
 

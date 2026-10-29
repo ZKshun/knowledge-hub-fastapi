@@ -25,7 +25,7 @@
 - [x] Task4：创建与查询用例、可恢复创建、事务行锁屏障及空正文防迟到标记；审查1项BIGINT问题已修复，完整172项无跳过。
 - [x] Task5：修改/软删除用例、完整恢复、内部CAS屏障、并发保护及独立恢复CLI；NUL快照问题经RED→GREEN修复，完整242项无跳过。
 - [x] Task6：五个FastAPI文档接口、原请求/错误/传输、双库生命周期、日志与入口；原75项双库差分、65项传输及SQL文本编码补证通过。独立审查3项Important经同轮修复，最终444项无跳过、覆盖94.85%，见[需求与实现报告](../versions/v1/task-6-report.md)。
-- [x] Task7：版本化原版SQL测试夹具、只读固定Action质量工作流、锁定依赖干净安装、全新隔离双库和正式CLI真实TCP实测；全分支审查发现的表单根级键与数字错误顺序已由真实旧服务证据RED→GREEN修复，最终451项0跳过、覆盖94.71%，静态门禁及文档审计通过；见[验收记录](../versions/v1/acceptance.md)和[一页报告](../versions/v1/implementation-flow-report.md)。云端CI因无remote未运行。
+- [x] Task7：版本化原版SQL测试夹具、只读固定Action质量工作流、锁定依赖干净安装、全新隔离双库和正式CLI真实TCP实测；全分支审查发现的表单根级键与数字错误顺序已由真实旧服务证据RED→GREEN修复，最终451项0跳过、覆盖94.71%，静态门禁及文档审计通过；见[验收记录](../versions/v1/acceptance.md)和[交付报告](../versions/v1/implementation-flow-report.md)。云端CI因无remote未运行。
 - [x] v1验收后以`--no-ff`本地合并main，合并树与v1验收树相同；合并后原版契约/E2E关键回归197项通过、0跳过。v1分支保留。
 
 ## 尚未完成
