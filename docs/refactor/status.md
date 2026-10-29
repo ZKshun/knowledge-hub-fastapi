@@ -5,7 +5,7 @@
 ## 当前定位
 
 - 项目：`knowledge-hub/knowledge-hub-fastapi`，独立 Git 仓库。
-- 当前版本：**v1**；阶段：**implementing（Task1–6已完成，下一项Task7验收）**。
+- 当前版本：**v1**；阶段：**verifying（Task1–6已完成，Task7执行中）**。
 - 当前分支：`v1`，直接从本地 main 创建。
 - 起点 main SHA：`5e43438`（空的仓库初始化提交）。当前 HEAD 使用 `git rev-parse HEAD` 查询；不在同一提交中自引用提交 SHA。
 - 当前无 remote；尚未合并、推送、发布或打标签。
@@ -33,6 +33,10 @@
 - [ ] v1 验收、合并 main；v2–v21 全部未开始。
 
 ## 下一项可直接执行的任务
+
+2026-10-29：Task7已启动，基准HEAD为`b9075b66790b94a537a16e3f14a37a93aaf8ab97`。发现原测试Compose依赖被忽略的`.local/legacy-v1` PostgreSQL脚本，干净克隆不可复现；已将与固定原版manifest哈希相同的脚本复制为版本化测试夹具并将Compose挂载改至该夹具，契约测试RED→GREEN。CI、干净安装、完整运行与验收仍在执行；不要把本段当作完成证据。
+
+Task7截至当前的实际结果：新锁定Python环境46依赖安装；新Compose卷原版测试表23列、0行；完整445 passed、0 skipped、94.85%；Ruff170文件、mypy strict94文件、行数91文件最长137。独立空应用库迁移升级→降级→升级、Mongo索引两次和恢复命令全0，正式模块进程真实TCP五接口与SQL/Mongo状态通过。CI文件YAML/Compose配置已本地解析，因无remote云端Actions未运行。当前仍处合并前审查和文档收尾，验收记录状态verifying；具体逐项证据见[验收记录](../versions/v1/acceptance.md)。
 
 按[v1计划](../superpowers/plans/2026-10-28-v1.md) **Task7：CI、实测运行说明与版本交接**开始。先核对Git实际HEAD、分支和变更；Task6开始前HEAD为abefa27，阶段提交信息为`feat(v1): expose compatible FastAPI document endpoints`，实际SHA使用Git查询。读取[v1规格](../versions/v1/spec.md)、[契约](../contracts/v1.md)、[Task6报告](../versions/v1/task-6-report.md)、D025–D029及验收模板；不要重做Task1–6。
 

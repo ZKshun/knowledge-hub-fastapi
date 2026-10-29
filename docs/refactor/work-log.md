@@ -105,3 +105,17 @@
 - 审查范围/代价已保留报告与账本：修复后未二次审查；真实TCP测试针对服务器日志，双库E2E为ASGI；有限传输语料不代表所有畸形HTTP组合。CI、干净安装/正式启动、最终验收仍Task7；OS kill/网络分区与部署演练未执行，不作生产就绪承诺。
 - 最终只读审计临时SQL schema/Mongo集合0残留；两个kh-fastapi-v1-test容器stop后均Exited(0)，卷保留。参考后端main b4dc6b2、前端v12 14ae352均干净，不修改旧代码/数据卷。AGENTS/README/架构/决策/规格/契约/计划/状态/报告同步，保存本地v1阶段提交`feat(v1): expose compatible FastAPI document endpoints`；实际SHA由Git核对，无main合并/remote推送。
 - 交接文档复核24个Markdown、115个本地链接、0失效/围栏错误，AGENTS保持30物理行；git diff --check通过。计划工作目录保留供未完成Task7接续。
+
+## 2026-10-29 · v1 Task 7：CI、干净环境与验收（执行中）
+
+- 起点v1 HEAD `b9075b66790b94a537a16e3f14a37a93aaf8ab97`、工作区干净；复用同一独立Python仓库。逐项需求/实现/结果已写入[验收记录](../versions/v1/acceptance.md)，合并前仍为verifying。
+- 发现测试Compose从忽略的`.local/legacy-v1`挂原版init.sql，干净克隆无法初始化public对照表。新增字节一致的`tests/fixtures/legacy_v1/postgresql/init.sql`，manifest SHA f3f94d...原值不变；缺文件契约RED→1项GREEN。Compose改挂版本化夹具；本轮全新Compose卷实测原版表23列/0行。D030记录复制测试DDL代价与CI来源。
+- `.github/workflows/quality.yml`以只读权限、固定checkout/setup-uv版本、Python3.12、锁定安装/静态门禁、专用双库/全套测试和always停止容器组成；离线js-yaml解析7步骤和push/PR触发、Docker Compose config均通过。当前无remote，云端Actions未运行。
+- 反向门禁：300/301文件规模10项通过；忽略目录内故意返回类型错误使mypy退出1，故意把字符串ID换数字使契约pytest退出1并准确报告`$.id`类型；不改变正式证据。
+- 全新`.local/task7-venv`按uv.lock安装46依赖；Ruff格式170文件/check通过、mypy strict94文件、生产/脚本91文件最长137/300、离线锁检查46依赖通过。
+- 用本轮新建的`kh-fastapi-v1-acceptance`项目提供隔离PG16/Mongo7，回环55432/57017；完整命令两个DB开关均1，`uv run --locked pytest tests/unit tests/integration tests/contract tests/e2e -q --basetemp=.local/pytest-runs/task7-full-001 --cov=knowledge_hub --cov-report=term-missing --cov-fail-under=85` → **445 passed、0 skipped、94.85%**，177.55秒。输出`.local/task7-full.log`，历史75快照未改。
+- 另建空`knowledge_hub_fastapi_app_test`只供正式运行：Alembic upgrade→base→head，23列/版本0001；Mongo索引命令两次成功、documentId_1唯一；恢复CLI在空队列与HTTP更新/删除后均输出completed/compensated/failed全0。
+- 正式`.local/task7-venv/Scripts/python.exe -m knowledge_hub.main --env-file .local/task7-app.env`监听127.0.0.1:38121；OpenAPI/docs200，创建201、列表/详情/修改/删除200、删除后详情404；真实PG标题/deleted/content_id与Mongo正文/version2/deleted/ID关联吻合。本轮启动器与日志中的服务PID均已消失，38121不再监听。配置/探针在忽略的.local，不入提交。
+- 测试夹具的临时SQL schema/Mongo集合最终只读审计各0。参考旧后端/前端只读、旧卷不动；本轮新验收容器保留运行供合并后完整回归，审查结束再停止。README按实测顺序加入安装→独立空库→迁移/索引/恢复→正式启动→验证/停止，质量规范/契约中过时的Task6待办同步更正。
+- 尚待：合并前全分支审查、最终文档/敏感数据/链接审计、Task7提交及验收状态、按既有授权本地main合并和合并后回归。CI云端运行、OS kill/网络分区与已有业务库baseline/导入不在本次实测范围，不作这些结论。
+- 中途文档复核25个Markdown、123个本地链接、0失效/围栏错误；AGENTS30物理行，git diff --check通过。阶段提交后进行全分支独立审查，验收状态保持verifying。

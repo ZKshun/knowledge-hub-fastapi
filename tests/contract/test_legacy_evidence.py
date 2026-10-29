@@ -7,6 +7,15 @@ from tests.contract.comparison import assert_equivalent, normalize_response
 FIXTURES = Path(__file__).parents[1] / "fixtures/contracts/v1"
 
 
+def test_clean_checkout_includes_authenticated_legacy_postgres_schema() -> None:
+    manifest = json.loads((FIXTURES / "manifest.json").read_text(encoding="utf-8"))
+    ddl = FIXTURES.parent.parent / "legacy_v1/postgresql/init.sql"
+    assert (
+        hashlib.sha256(ddl.read_bytes()).hexdigest()
+        == manifest["sourceFilesSha256"]["init-scripts/postgresql/init.sql"]
+    )
+
+
 def load_case(name: str) -> dict:
     paths = list(FIXTURES.glob(f"*_{name}.json"))
     assert len(paths) == 1, f"Missing or ambiguous captured case: {name}"

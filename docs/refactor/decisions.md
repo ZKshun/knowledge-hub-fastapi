@@ -33,6 +33,7 @@
 | D027 | 2026-10-29 | 实施默认值/Task6原版运行 | HTTP解析、路由大小写/尾斜杠/HEAD、原错误顺序和字符串/数组message属于兼容边界；JSON/表单/字符集/压缩按原版顺序处理，展开正文100KB，字段类型保留缺失/null/JS Number。Node UTF-8替换同时用于PG文本与BSON，API原输入和持久化读回差别按原版保留 |
 | D028 | 2026-10-29 | 实施默认值/Task6审查修复 | 应用内消费未预期HTTP异常，仅记录类型并返回脱敏500；不能仅靠Exception handler返回500后仍让Starlette重抛给Uvicorn记录完整消息。用真实TCP Uvicorn回归证明普通日志不含正文sentinel；只记录请求ID/方法/状态/耗时，不记body/query |
 | D029 | 2026-10-29 | 实施默认值/Task6依赖 | 为原br请求兼容新增Brotli>=1.2.1,<2，当前锁1.2.1；解压SDK隔离integrations/http并限制输出/展开长度。typings/brotli.pyi仅声明实际使用的官方SDK接口，mypy strict使用该精确边界而非宽泛ignore；代价为一个依赖和有界解码/规范化开销，无Node生产依赖 |
+| D030 | 2026-10-29 | 实施默认值/Task7干净环境 | 测试Compose挂载版本化的原版PostgreSQL初始化SQL，契约测试以原75份manifest中的源码哈希逐字节核验；避免新克隆依赖被忽略的.local旧服务导出。质量工作流以只读权限和固定[checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1)、[setup-uv v10.3.2](https://github.com/astral-sh/setup-uv/releases/tag/v10.3.2)运行锁定Python3.12、静态门禁及双库全套测试；无remote时只能称本地命令通过，不能称云端CI已运行。代价为仓库多一个仅测试用的原版DDL副本和CI专用容器资源 |
 
 ## 变更规则
 

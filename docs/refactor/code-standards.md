@@ -53,18 +53,18 @@
 
 ## 测试和门禁
 
-Task 2 后格式、lint、类型、文件门禁和现有测试命令均已实测；完整 v1 集成/E2E 仍未实现。下面是最终验收命令，不能把尚未存在的测试目录作为已通过证据：
+Task7已在全新锁定Python环境和全新隔离双库执行完整v1集成/E2E。下面命令由[质量工作流](../../.github/workflows/quality.yml)复用，真实库用例还需显式启用两个DB开关并启动测试Compose：
 
 ```bash
 uv sync --locked --all-groups
 uv run ruff format --check .
 uv run ruff check .
-uv run mypy src
+uv run mypy src scripts migrations tests/contract/comparison.py
 uv run python scripts/check_file_limits.py
 uv run pytest tests/unit tests/integration tests/contract tests/e2e --cov=knowledge_hub --cov-report=term-missing --cov-fail-under=85
 ```
 
-覆盖率阈值计 `src/knowledge_hub`，排除范围仅允许生成代码，禁止把难测业务排除。v1 的纯文档/空工程阶段不运行一个必然失败的“零业务覆盖率”门禁来伪造完成；v1 交付时必须真正启用。
+覆盖率阈值计 `src/knowledge_hub`，排除范围仅允许生成代码，禁止把难测业务排除。Task7完整回归已实际启用覆盖率门禁，结果见[v1验收记录](../versions/v1/acceptance.md)。
 
 单元测试用确定性时钟、ID、模型和仓储；集成测试连隔离的真实 PostgreSQL/MongoDB 等依赖；契约测试与旧版同输入对比；E2E 验证业务闭环。变更缺陷先复现，再最小修复并验证；单纯文档调整只做链接、内容和 Git 检查，不强跑无关业务测试。
 

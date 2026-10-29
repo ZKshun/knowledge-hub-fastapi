@@ -12,7 +12,7 @@ services:
       - "127.0.0.1:${KH_TEST_POSTGRES_PORT:-55432}:5432"
     volumes:
       - postgres_test:/var/lib/postgresql/data
-      - ../.local/legacy-v1/init-scripts/postgresql:/docker-entrypoint-initdb.d:ro
+      - ../tests/fixtures/legacy_v1/postgresql:/docker-entrypoint-initdb.d:ro
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U kh_test -d knowledge_hub_fastapi_test"]
       interval: 2s

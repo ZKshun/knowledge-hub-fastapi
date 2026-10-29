@@ -1,0 +1,42 @@
+name: v1 quality
+
+on:
+  push:
+    branches: [main, "v*"]
+  pull_request:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Checkout
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install uv and Python 3.12
+        uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.12"
+          version: "0.12.15"
+      - name: Install locked dependencies
+        run: uv sync --locked --all-groups --link-mode=copy
+      - name: Check format, lint, types, file sizes and lock
+        run: |
+          uv run --locked ruff format --check .
+          uv run --locked ruff check .
+          uv run --locked mypy src scripts migrations tests/contract/comparison.py
+          uv run --locked python scripts/check_file_limits.py
+          uv lock --check --offline
+      - name: Start isolated PostgreSQL and MongoDB
+        run: docker compose -p kh-fastapi-v1-test -f deploy/compose.test.yml up -d --wait --wait-timeout 120
+      - name: Run complete v1 suite
+        env:
+          KH_RUN_STORAGE_DB_TESTS: "1"
+          KH_RUN_LEGACY_DB_TESTS: "1"
+        run: uv run --locked pytest tests/unit tests/integration tests/contract tests/e2e -q --cov=knowledge_hub --cov-report=term-missing --cov-fail-under=85
+      - name: Stop isolated databases
+        if: always()
+        run: docker compose -p kh-fastapi-v1-test -f deploy/compose.test.yml stop
