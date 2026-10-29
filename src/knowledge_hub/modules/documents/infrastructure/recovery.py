@@ -10,10 +10,11 @@ from knowledge_hub.modules.documents.infrastructure.content_record import Docume
 from knowledge_hub.modules.documents.infrastructure.content_repository import ContentRepository
 from knowledge_hub.modules.documents.infrastructure.document_lock import DocumentLock
 from knowledge_hub.modules.documents.infrastructure.document_row import DocumentRow
-from knowledge_hub.modules.documents.infrastructure.mappers import to_operation_record
+from knowledge_hub.modules.documents.infrastructure.mappers import as_utc, to_operation_record
 from knowledge_hub.modules.documents.infrastructure.operation_journal import OperationJournal
 from knowledge_hub.modules.documents.infrastructure.operation_row import OperationRow
 from knowledge_hub.modules.documents.infrastructure.operation_types import RecoveryReport
+from knowledge_hub.modules.documents.infrastructure.recovery_mutations import compensate_mutation
 from knowledge_hub.modules.documents.infrastructure.transaction_fence import lock_operation
 
 type RecoveryOutcome = Literal["completed", "compensated", "failed"]
@@ -75,18 +76,30 @@ class RecoveryService:
     async def _resolve_locked(
         self, session: AsyncSession, row: OperationRow | None
     ) -> RecoveryOutcome:
-        if row is None or row.operation_type != "create":
+        if row is None:
             raise OperationRecoveryError("Unsupported or missing recovery operation")
         if row.state == "compensated":
             return "compensated"
         metadata = await session.get(DocumentRow, row.document_id)
         if row.state == "completed":
             if metadata is None or metadata.content_id != row.snapshot.get("content_id"):
-                raise OperationRecoveryError("Completed create metadata does not match its journal")
+                raise OperationRecoveryError("Completed metadata does not match its journal")
             return "completed"
-        if metadata is not None:
-            raise OperationRecoveryError("Pending create conflicts with existing metadata")
-        await self.contents.compensate_creation(to_operation_record(row))
+        operation = to_operation_record(row)
+        if row.operation_type == "create":
+            if metadata is not None:
+                raise OperationRecoveryError("Pending create conflicts with existing metadata")
+            await self.contents.compensate_creation(operation)
+        else:
+            if (
+                metadata is None
+                or metadata.deleted
+                or metadata.content_id != row.snapshot.get("content_id")
+                or as_utc(metadata.updated_at).isoformat()
+                != row.snapshot.get("metadata_updated_at")
+            ):
+                raise OperationRecoveryError("Pending mutation conflicts with SQL metadata")
+            await compensate_mutation(self.contents.collection, operation)
         row.state, row.last_error, row.updated_at = "compensated", None, datetime.now(UTC)
         return "compensated"
 

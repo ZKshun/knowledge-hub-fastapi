@@ -1,9 +1,11 @@
+from collections.abc import Callable
+
 from pymongo.asynchronous.collection import AsyncCollection
 
 from knowledge_hub.core.errors import DocumentOperationPending
 from knowledge_hub.core.identifiers import DocumentId
 from knowledge_hub.integrations.postgres.database import PostgresDatabase
-from knowledge_hub.modules.documents.domain.commands import DocumentQuery
+from knowledge_hub.modules.documents.domain.commands import DocumentMutation, DocumentQuery
 from knowledge_hub.modules.documents.domain.document import DocumentDetail, DocumentPage
 from knowledge_hub.modules.documents.infrastructure.content_record import DocumentContentRecord
 from knowledge_hub.modules.documents.infrastructure.content_repository import ContentRepository
@@ -16,7 +18,7 @@ from knowledge_hub.modules.documents.infrastructure.write_coordinator import Wri
 
 
 class PostgresMongoDocumentStore:
-    """Read and recoverable-create adapter; mutation methods arrive in Task 5."""
+    """Document storage with journaled cross-database writes and explicit recovery."""
 
     def __init__(
         self, postgres: PostgresDatabase, collection: AsyncCollection[DocumentContentRecord]
@@ -31,6 +33,14 @@ class PostgresMongoDocumentStore:
 
     async def create(self, draft: DocumentDetail) -> DocumentDetail:
         return await self.writer.create(draft)
+
+    async def mutate(
+        self, document_id: DocumentId, transform: Callable[[DocumentDetail], DocumentMutation]
+    ) -> DocumentDetail:
+        return await self.writer.mutate(document_id, transform)
+
+    async def soft_delete(self, document_id: DocumentId) -> None:
+        await self.writer.soft_delete(document_id)
 
     async def recover_pending(self, *, limit: int = 100) -> RecoveryReport:
         return await self.recovery.recover_pending(limit=limit)

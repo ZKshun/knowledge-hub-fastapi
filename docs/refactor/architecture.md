@@ -115,7 +115,11 @@ v3 在 PostgreSQL 增加事务 Outbox：业务状态和事件同事务提交，�
 
 新可靠性表和内部状态字段属于添加式扩展，不改变原有业务表、正文集合和 HTTP 契约。现有数据导入、已有库 Alembic baseline 必须使用明确操作流程，不在启动时自动 stamp 或覆盖表。
 
-Task3基础与Task4创建/查询及创建恢复已实现：prepare独立提交、pending门禁、单文档pending唯一、metadata/completed同事务、行锁屏障及条件补偿均有真实库证据。get对未决详情继续显式拒绝，恢复入口单独调用；mutate/soft_delete及其完整恢复仍待Task5，HTTP待Task6。不能把创建恢复测试当作全部写入或HTTP闭环验收。
+Task3基础、Task4创建/查询及Task5修改/软删除/完整恢复已实现：prepare独立提交、pending门禁、单文档pending唯一、metadata/completed同事务、行锁屏障及条件补偿均有真实库证据。get对未决详情继续显式拒绝，恢复入口单独调用；mutation_plan/writer、content_mutations/recovery_mutations及恢复CLI按职责分开，HTTP仍待Task6。
+
+修改与删除的Mongo CAS同时匹配version和operationId，每次实际正文/摘要/删除写入设置新operationId。补偿恢复公开版本与字段，但设置固定rollback:<operation_id>新标记，绝不恢复旧标记；原状态、本次应用状态和相同补偿状态均原子匹配，其他版本/标记明确拒绝。这样既可重复恢复，也能阻止公开版本回退后的旧在途写入再次命中（D023）。普通元数据PATCH不改变Mongo版本/标记。
+
+旧正文/摘要在JSONB快照中通过snapshot_encoding执行UTF-8→Base64编码，补偿严格解码；null与空串分别保存。BSON允许NUL而PG JSONB拒绝，内部日志不能因此拒绝合法正文（D024）。这只是可逆编码，私有快照仍需数据库权限控制；代价是快照文本约三分之一额外存储。
 
 ## 问答与流式复用
 

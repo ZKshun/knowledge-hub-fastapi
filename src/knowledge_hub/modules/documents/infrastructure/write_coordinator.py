@@ -1,18 +1,25 @@
+from collections.abc import Callable
+
 from pymongo.asynchronous.collection import AsyncCollection
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from knowledge_hub.core.errors import DocumentAlreadyExists, DocumentOperationPending
+from knowledge_hub.core.identifiers import DocumentId
 from knowledge_hub.integrations.postgres.database import PostgresDatabase
+from knowledge_hub.modules.documents.domain.commands import DocumentMutation
 from knowledge_hub.modules.documents.domain.document import DocumentDetail
 from knowledge_hub.modules.documents.infrastructure.content_record import DocumentContentRecord
 from knowledge_hub.modules.documents.infrastructure.content_repository import ContentRepository
 from knowledge_hub.modules.documents.infrastructure.document_lock import DocumentLock
 from knowledge_hub.modules.documents.infrastructure.mappers import to_row
 from knowledge_hub.modules.documents.infrastructure.metadata_repository import MetadataRepository
+from knowledge_hub.modules.documents.infrastructure.mutation_writer import MutationWriter
 from knowledge_hub.modules.documents.infrastructure.operation_journal import OperationJournal
 from knowledge_hub.modules.documents.infrastructure.recovery import RecoveryService
 from knowledge_hub.modules.documents.infrastructure.transaction_fence import lock_operation
 from knowledge_hub.modules.documents.infrastructure.write_create import CreationPlan, plan_creation
+from knowledge_hub.modules.documents.infrastructure.write_delete import plan_delete
+from knowledge_hub.modules.documents.infrastructure.write_update import plan_update
 
 
 async def commit_business(session: AsyncSession) -> None:
@@ -29,6 +36,19 @@ class WriteCoordinator:
         self.journal = OperationJournal(postgres.sessions)
         self.lock = DocumentLock(postgres.lock_engine)
         self.recovery = RecoveryService(postgres, collection)
+        self.mutations = MutationWriter(postgres, collection)
+
+    async def mutate(
+        self, document_id: DocumentId, transform: Callable[[DocumentDetail], DocumentMutation]
+    ) -> DocumentDetail:
+        return await self.mutations.run(
+            document_id,
+            lambda current, body: plan_update(current, transform(current), body),
+            commit=commit_business,
+        )
+
+    async def soft_delete(self, document_id: DocumentId) -> None:
+        await self.mutations.run(document_id, plan_delete, commit=commit_business)
 
     async def create(self, draft: DocumentDetail) -> DocumentDetail:
         plan = plan_creation(draft)

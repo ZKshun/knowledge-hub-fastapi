@@ -75,3 +75,17 @@
 - 最终完整命令同前，basetemp为task4-final-013 → **172 passed、0 skipped、0 failed，95.12%**；Ruff format103文件/检查通过，mypy strict56文件，行数54文件最长133行，uv lock --check --offline45依赖通过。只进行一轮审查修复，未冒称reviewer复核修复后代码。
 - 最终临时SQL schema/Mongo集合0残留；两个专用测试容器均stop并核对Exited(0)，卷保留。README/架构/决策/规格/契约/计划/状态/报告/日志同步，下一Task5。参考前后端Git工作区干净；75原快照未改。提交信息`feat(v1): add recoverable document creation and queries`，实际SHA由Git核对，无main合并或远端推送。
 - 交接文档复核22个Markdown、94个本地链接、0失效/围栏错误；AGENTS保持30物理行。最终Git差异空白检查后本地提交。
+
+## 2026-10-29 · v1 Task 5：修改/软删除与完整恢复
+
+- 开始前HEAD188c95a68007c40492b64c4f9b4903542cd4ba94，v1干净；继续专属Python checkout，未创建额外工作树。仅本Task5；基线123通过/49未启用DB测试跳过，随后启动既有两个专用容器Healthy，不启动旧HTTP或触碰旧卷。
+- 需求与实现逐项对照见[Task5报告](../versions/v1/task-5-report.md)。新增update/delete应用用例，mutation_plan/writer、write_update/delete、content_mutations/recovery_mutations及恢复CLI，store完整满足DocumentStore。显式相同/空正文增版本，空PATCH/摘要/标题不增；发布转换/外部BIGINT原生CAST/缺正文/重复删除沿用原契约。
+- TDD：用例缺模块2收集错误RED→16通过；store缺修改/删除11失败；恢复create-only15失败/6通过→完整32真实库测试通过；CLI缺脚本2失败→实现后独立子进程演练通过。强化实际pg_locks等待，并增外部operation/version保护、补偿自身中断、迟到写入器，专项22通过。
+- D023：Mongo CAS绑定旧version/operationId；补偿恢复公开版本/正文/删除标志但设固定新rollback屏障，防旧在途CAS在版本回退后再次匹配。日志行锁仍是SQL事务已结束的证据，pending阻止详情/修改/删除；创建空creationFence仍保留，不物理清除。
+- 首轮完整231通过、0跳过、94.86%。自查BSON合法NUL正文/摘要无法原样进入JSONB快照，2项真实库RED；单次独立审查确认同一Important，0Critical/0Minor。reviewer只读源/测试/legacy/决策，独立16单元测试及diff检查，没有执行数据库写入测试。
+- 同轮修复：扩正文/摘要/删除/回滚4项均失败RED，D024使用UTF8→Base64内部快照、补偿严格解码，受影响40项GREEN，再补null/空串/Unicode摘要还原。可逆编码并非加密，仍需SQL权限控制；代价为快照文本约三分之一存储开销。未安排二次审查，修复后由主执行者完整验证。
+- 最终实际命令：两个DB开关均1，`.venv/Scripts/python.exe -m pytest -q --basetemp=.local/pytest-runs/task5-final-015 --cov=knowledge_hub --cov-report=term-missing --tb=short` → **242 passed、0 skipped、0 failed、95.01%**，约91秒。新增16用例单元+54真实库/子进程/恢复/并发测试；完整包括原legacy探针，75份快照未覆盖。
+- 最终Ruff format123文件/check通过；mypy strict src/scripts/migrations及比较器67文件通过；物理行64生产/脚本文件最长133/300；uv lock --check --offline解析45依赖。uv run --locked恢复CLI --help实测通过；CLI子进程真实恢复compensated=1/failed=0，再跑计数全0，冲突退出1且不输出正文，参数无效退出2。
+- 故障验证为真实SQL/Mongo操作+测试内I/O边界替换；模拟中断/取消、新实例连接、已提交丢回包、真实业务TCP拒绝与活动旧SQL行锁。未声称OS kill、整PG重启/停机、网络分区或独立锁传输故障现场验证。HTTP/差分留Task6；CI/部署/生产访问/长期保留/完整验收留Task7及运营策略，不能据此声明v1可部署。
+- 最终临时SQL schema与Mongo集合均0残留；两个kh-fastapi-v1-test容器stop后Exited(0)，卷保留，旧参考前后端Git干净。README/状态/架构/契约/规格/决策/计划/报告已同步，下一Task6。本地提交信息`feat(v1): add recoverable document mutations and recovery CLI`，SHA由Git核对；未合并main、未推送/发布。
+- 交接文档复核23个Markdown、104个本地链接、0失效/围栏错误；AGENTS保持30物理行，计划工作目录保留供Task6–7接续。

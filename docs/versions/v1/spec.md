@@ -1,6 +1,6 @@
 # v1：文档与工程基线规格
 
-总体方向已接受。来源：旧后端 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；接口字段和副作用详见 [v1 契约](../../contracts/v1.md)。Task1–4已完成，Task4审查问题经TDD修复并完整回归；业务闭环待Task5–7。
+总体方向已接受。来源：旧后端 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；接口字段和副作用详见 [v1 契约](../../contracts/v1.md)。Task1–5已完成，Task5的NUL快照审查问题经RED→GREEN及完整242项回归修复；HTTP闭环与验收待Task6–7。
 
 ## 目标与边界
 
@@ -39,7 +39,9 @@ Alembic 建立原版 `kh_document` 的兼容结构和内部操作日志，Mongo 
 
 创建、修改、软删除必须定义并记录跨库步骤：先准备操作日志，再执行 Mongo 写与 PostgreSQL 元数据事务，成功标记 completed；SQL 确认回滚后才恢复或删除 Mongo 变化。Mongo 变更与补偿以操作 ID/预期正文版本作条件，避免覆盖后续成功修改。
 
-Task4将创建补偿具体化为清空自有正文并保留空deleted创建标记（D021），替代物理删除，以阻止迟到的Mongo insert。写入器持有日志行锁直至SQL提交；恢复的新session获得同一行锁并核对completed/metadata，作为旧事务已结束的证据（D020）。不修改原表列，不向HTTP暴露标记；更新/删除的恢复由Task5继续证明。
+Task4将创建补偿具体化为清空自有正文并保留空deleted创建标记（D021），替代物理删除，以阻止迟到的Mongo insert。写入器持有日志行锁直至SQL提交；恢复的新session获得同一行锁并核对completed/metadata，作为旧事务已结束的证据（D020）。不修改原表列，不向HTTP暴露标记；该阶段仅证明创建，更新/删除证据见下段。
+
+Task5已完成更新/删除的相同事务屏障与恢复：CAS匹配公开version和内部operationId，补偿换成rollback:<operation_id>新标记，恢复公开版本也不重新接受旧CAS（D023）。快照正文/摘要采用UTF-8→Base64，兼容BSON的NUL且保留null/空串（D024）；这不是加密，受控SQL日志不能进入普通日志。恢复CLI与并发/故障证据见[Task5报告](task-5-report.md)。
 
 COMMIT 回包丢失属于结果未知，不得因客户端异常直接补偿。在线错误路径与重启恢复都要结束/丢弃旧连接、重新获取同文档锁，确认原事务已结束，再用新连接核验 completed/元数据。提交成功保留正文，确认未提交才补偿；无法核验时保留 prepared 等待恢复并阻止同文档新写入，数据库持续不可用时不猜测执行结果。
 

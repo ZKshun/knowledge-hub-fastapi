@@ -43,8 +43,13 @@ class ContentRepository:
             upsert=True,
         )
 
-    async def get(self, content_id: str) -> ContentSnapshot | None:
-        record = await self.collection.find_one({"_id": ObjectId(content_id), "deleted": False})
+    async def get(
+        self, content_id: str, *, include_deleted: bool = False
+    ) -> ContentSnapshot | None:
+        selector: dict[str, object] = {"_id": ObjectId(content_id)}
+        if not include_deleted:
+            selector["deleted"] = False
+        record = await self.collection.find_one(selector)
         if record is None:
             return None
         return ContentSnapshot(

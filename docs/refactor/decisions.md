@@ -26,6 +26,8 @@
 | D020 | 2026-10-28 | 实施默认值/Task 4 实测 | 使用prepared日志行FOR UPDATE作为SQL事务结束屏障：写入器从Mongo前持有到metadata/completed提交，恢复先重取文档锁再用新session取日志行锁、核对completed/元数据；超时或SQL不可用时保留未决状态，不猜回滚 |
 | D021 | 2026-10-28 | 实施默认值/Task 4 故障协议 | 创建补偿清空自有Mongo正文并保留预分配_id、operationId、version1、deleted=true、creationFence=true的空标记，条件匹配operation/version；替代物理删除以阻止迟到insert重建孤立正文。标记不作为业务文档/响应，不自动清理，代价是少量持久内部行 |
 | D022 | 2026-10-28 | 实施默认值/Task 4 审查修复 | 外部BIGINT字符串使用绑定Text参数后由PostgreSQL原生CAST解析，覆盖外键/操作者写入、筛选、路由查询/pending门禁及锁键规范化；禁止Python int/strip改变PG接受集合。内部生成或从数据库读取的规范十进制ID仍可绑定数值 |
+| D023 | 2026-10-29 | 实施默认值/Task5故障协议 | 修改/删除Mongo CAS同时匹配公开version和内部operationId；补偿原子匹配原状态、本次已写状态或同一次补偿状态，恢复原正文/版本/删除标志并设置固定rollback:<operation_id>新屏障，绝不恢复旧operationId，防公开版本回退后迟到CAS再次命中。私有恢复快照只入受控SQL日志，普通日志/CLI不输出正文；代价是内部标记可变而公开版本不变 |
+| D024 | 2026-10-29 | 实施默认值/Task5自查与审查修复 | JSONB恢复快照中的旧正文/摘要以UTF-8→Base64编码，保留null与空串差别；补偿严格解码恢复。原因是BSON允许NUL但PG JSONB拒绝，不能让内部日志缩小原接口允许内容。Base64是可逆编码而非加密，仍受数据库权限控制；代价为快照文本约三分之一存储开销 |
 
 ## 变更规则
 

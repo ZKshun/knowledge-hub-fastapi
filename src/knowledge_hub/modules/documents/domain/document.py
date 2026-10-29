@@ -50,3 +50,9 @@ class DocumentPage:
     total: int
     page: int
     page_size: int
+
+
+@dataclass(frozen=True, slots=True, kw_only=True)
+class DeleteDocumentResult:
+    document_id: DocumentId
+    deleted: bool
