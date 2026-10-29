@@ -89,3 +89,19 @@
 - 故障验证为真实SQL/Mongo操作+测试内I/O边界替换；模拟中断/取消、新实例连接、已提交丢回包、真实业务TCP拒绝与活动旧SQL行锁。未声称OS kill、整PG重启/停机、网络分区或独立锁传输故障现场验证。HTTP/差分留Task6；CI/部署/生产访问/长期保留/完整验收留Task7及运营策略，不能据此声明v1可部署。
 - 最终临时SQL schema与Mongo集合均0残留；两个kh-fastapi-v1-test容器stop后Exited(0)，卷保留，旧参考前后端Git干净。README/状态/架构/契约/规格/决策/计划/报告已同步，下一Task6。本地提交信息`feat(v1): add recoverable document mutations and recovery CLI`，SHA由Git核对；未合并main、未推送/发布。
 - 交接文档复核23个Markdown、104个本地链接、0失效/围栏错误；AGENTS保持30物理行，计划工作目录保留供Task6–7接续。
+
+## 2026-10-29 · v1 Task 6：FastAPI五接口与兼容适配
+
+- 开始前HEAD abefa27b3f67a9da6ba821c5dadb023b2903d538，v1干净；沿用专属checkout，仅执行Task6。快速基线139项通过，再启动专用双库Healthy。逐项需求/实现/证据见[Task6报告](../versions/v1/task-6-report.md)，下一项Task7，未验收/合并v1。
+- 五个/documents接口复用既有用例；DTO/映射/校验/查询数值/路由分文件，保留camelCase、字符串ID、POST201、分页、null和缺失、原错误顺序。app工厂/路由/lifespan/错误/OpenAPI/日志分职责；默认配置延迟到启动，Mongo和PG双池由AsyncExitStack关闭，main导出ASGI并支持PORT与显式--env-file。
+- TDD：缺app模块RED→30项契约通过；入口/日志3项RED→35项相关通过；新差分模块缺失RED→原75项逐例真实双库HTTP重放全部通过。独立连续双库ASGI E2E补齐创建→读取→修改→软删除→404；8项负向比较器和内部标记实库测试防关联、精度/时区和删除正文被忽略。
+- D025：新/变化时间先核验窗口、毫秒精度、时区和API→SQL关联再归一化，未变化字段严格比较；ObjectId按文档关联。仅071恢复原Mongo、073回滚SQL删除采用可靠性增强期望，074注入实际新补偿边界；原75份expected未改，业务deleted记录保留。代价为逐例隔离重放，连续路径另以E2E证明。
+- 首轮完整372通过、0跳过、95.21%。补采固定原版真实HTTP证据，最终另存65项传输边界，保留请求字节/输入SHA/头/响应/编译身份；另存1份成功POST/GET及SQL/Mongo文本编码证据，未把新服务结果当expected。采集源固定Node22.23.2、旧v1 SHA及原compiledMain哈希，源进程都在各自finally停止。
+- 单次独立只读审查：0Critical、3Important、0Minor，分别为Uvicorn重抛泄漏原异常、字节/字符集/压缩解析不兼容、JSON数字/字面量词法诊断不兼容。reviewer自行72项纯测试通过/2已知失败、3流式测试及真实Uvicorn协议内存transport验证，没有独立重跑完整双库。
+- 同轮修复39失败/28通过RED→70项GREEN：SafeExceptionMiddleware消费未预期HTTP异常，真实TCP Uvicorn回归证明响应与普通日志不含私有sentinel；字符集校验→有界解压→解码→重放，100KB展开上限；JSON词法保留Node22消息/UTF-16位置，URL表单与路由HEAD等按原协议。D027–D029记录边界、脱敏及新增锁定Brotli1.2.1/精确SDK类型声明，代价为一个依赖和有界规范化成本，生产不依赖Node。
+- 同轮自查未配对代理字符：原POST201而新500先RED；node_utf8_string统一Node pg/BSON替换，五类SQL文本和PATCH读回验证，68相关项GREEN。显式dotenv入口2项RED→CLI/lifespan6项GREEN。D026保留默认惰性配置和显式Settings注入；正式命令干净安装整体实测留Task7。
+- 最终实际命令：KH_RUN_STORAGE_DB_TESTS=1、KH_RUN_LEGACY_DB_TESTS=1，`.venv/Scripts/python.exe -m pytest -q --basetemp=.local/pytest-runs/task6-final-026 --cov=knowledge_hub --cov-report=term-missing --tb=short` → **444 passed、0 skipped、0 failed，94.85%**，196.71秒。源码冻结后只更新文档，未为文档重复完整测试。
+- 最终静态复核：Ruff check/format170文件、mypy strict src/scripts/migrations及比较器94文件、生产/脚本91文件最长137/300行、uv lock --check --offline46依赖均通过。无宽泛ignore或行数豁免；历史75快照diff为空。
+- 审查范围/代价已保留报告与账本：修复后未二次审查；真实TCP测试针对服务器日志，双库E2E为ASGI；有限传输语料不代表所有畸形HTTP组合。CI、干净安装/正式启动、最终验收仍Task7；OS kill/网络分区与部署演练未执行，不作生产就绪承诺。
+- 最终只读审计临时SQL schema/Mongo集合0残留；两个kh-fastapi-v1-test容器stop后均Exited(0)，卷保留。参考后端main b4dc6b2、前端v12 14ae352均干净，不修改旧代码/数据卷。AGENTS/README/架构/决策/规格/契约/计划/状态/报告同步，保存本地v1阶段提交`feat(v1): expose compatible FastAPI document endpoints`；实际SHA由Git核对，无main合并/remote推送。
+- 交接文档复核24个Markdown、115个本地链接、0失效/围栏错误，AGENTS保持30物理行；git diff --check通过。计划工作目录保留供未完成Task7接续。

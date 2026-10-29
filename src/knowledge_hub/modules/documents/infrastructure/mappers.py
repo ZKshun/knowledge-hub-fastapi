@@ -20,8 +20,8 @@ def as_utc(value: datetime) -> datetime:
     return value.replace(tzinfo=UTC) if value.tzinfo is None else value.astimezone(UTC)
 
 
-def bson_string(value: str) -> str:
-    # Node's BSON UTF-8 encoder replaces unpaired UTF-16 surrogates with U+FFFD.
+def node_utf8_string(value: str) -> str:
+    # Node's pg/BSON UTF-8 encoders replace unpaired UTF-16 surrogates with U+FFFD.
     return value.encode("utf-16-le", errors="surrogatepass").decode("utf-16-le", errors="replace")
 
 
@@ -75,21 +75,25 @@ def _bigint(value: str | None) -> Cast[int] | None:
     return bigint_parameter(value) if value is not None else None
 
 
+def _text(value: str | None) -> str | None:
+    return node_utf8_string(value) if value is not None else None
+
+
 def to_row(document: Document) -> DocumentRow:
     if document.content_id is None:
         raise ValueError("Persisted documents require a content ID")
     return DocumentRow(
         id=int(document.id),
-        title=document.title,
+        title=node_utf8_string(document.title),
         content_id=document.content_id,
-        summary=document.summary,
+        summary=_text(document.summary),
         category_id=_bigint(document.category_id),
         team_id=_bigint(document.team_id),
         author_id=_bigint(document.author_id),
-        cover_image=document.cover_image,
-        tags=document.tags,
+        cover_image=_text(document.cover_image),
+        tags=_text(document.tags),
         status=int(document.status),
-        remark=document.remark,
+        remark=_text(document.remark),
         view_count=document.view_count,
         like_count=document.like_count,
         comment_count=document.comment_count,
@@ -118,9 +122,9 @@ def make_content_record(
     record: DocumentContentRecord = {
         "_id": ObjectId(),
         "documentId": str(document_id),
-        "content": bson_string(content),
+        "content": node_utf8_string(content),
         "contentLength": content_length(content),
-        "contentSummary": bson_string(
+        "contentSummary": node_utf8_string(
             summary if summary is not None else build_content_summary(content)
         ),
         "version": 1,

@@ -8,7 +8,7 @@ from knowledge_hub.modules.documents.domain.text_metrics import (
     content_length,
 )
 from knowledge_hub.modules.documents.infrastructure.content_record import ContentSnapshot
-from knowledge_hub.modules.documents.infrastructure.mappers import bson_string
+from knowledge_hub.modules.documents.infrastructure.mappers import node_utf8_string
 from knowledge_hub.modules.documents.infrastructure.mutation_plan import MutationPlan, plan_mutation
 
 
@@ -24,16 +24,16 @@ def plan_update(
             raise DocumentContentNotFound(current.document.content_id or "")
         summary = target.document.summary if "summary" in fields else None
         changes.update(
-            content=bson_string(target.content),
+            content=node_utf8_string(target.content),
             contentLength=content_length(target.content),
-            contentSummary=bson_string(
+            contentSummary=node_utf8_string(
                 summary if summary is not None else build_content_summary(target.content)
             ),
             version=content.version + 1,
         )
     elif "summary" in fields and content is not None:
         summary = target.document.summary
-        changes["contentSummary"] = bson_string(summary) if summary is not None else None
+        changes["contentSummary"] = node_utf8_string(summary) if summary is not None else None
     if changes:
         now = datetime.now(UTC)
         changes["updatedAt"] = now.replace(microsecond=now.microsecond // 1000 * 1000)

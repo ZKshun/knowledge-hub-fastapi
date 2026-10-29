@@ -115,11 +115,23 @@ v3 在 PostgreSQL 增加事务 Outbox：业务状态和事件同事务提交，�
 
 新可靠性表和内部状态字段属于添加式扩展，不改变原有业务表、正文集合和 HTTP 契约。现有数据导入、已有库 Alembic baseline 必须使用明确操作流程，不在启动时自动 stamp 或覆盖表。
 
-Task3基础、Task4创建/查询及Task5修改/软删除/完整恢复已实现：prepare独立提交、pending门禁、单文档pending唯一、metadata/completed同事务、行锁屏障及条件补偿均有真实库证据。get对未决详情继续显式拒绝，恢复入口单独调用；mutation_plan/writer、content_mutations/recovery_mutations及恢复CLI按职责分开，HTTP仍待Task6。
+Task3基础、Task4创建/查询及Task5修改/软删除/完整恢复已实现：prepare独立提交、pending门禁、单文档pending唯一、metadata/completed同事务、行锁屏障及条件补偿均有真实库证据。get对未决详情继续显式拒绝，恢复入口单独调用；mutation_plan/writer、content_mutations/recovery_mutations及恢复CLI按职责分开。Task6已将五个应用用例接入HTTP并完成差分，完整验收仍待Task7。
 
 修改与删除的Mongo CAS同时匹配version和operationId，每次实际正文/摘要/删除写入设置新operationId。补偿恢复公开版本与字段，但设置固定rollback:<operation_id>新标记，绝不恢复旧标记；原状态、本次应用状态和相同补偿状态均原子匹配，其他版本/标记明确拒绝。这样既可重复恢复，也能阻止公开版本回退后的旧在途写入再次命中（D023）。普通元数据PATCH不改变Mongo版本/标记。
 
 旧正文/摘要在JSONB快照中通过snapshot_encoding执行UTF-8→Base64编码，补偿严格解码；null与空串分别保存。BSON允许NUL而PG JSONB拒绝，内部日志不能因此拒绝合法正文（D024）。这只是可逆编码，私有快照仍需数据库权限控制；代价是快照文本约三分之一额外存储。
+
+## v1 HTTP适配与装配
+
+documents/api按requests、responses、mappers、validation/query_numbers、dependencies和router拆分。router只调用应用用例；provided_fields由模型exclude_unset保留。协议错误消息顺序由固定Nest证据确定，Pydantic模型负责明确类型与schema，不将默认422/detail作为接口。
+
+app/factory汇总路由、OpenAPI、错误处理和中间件；lifespan显式持有DocumentServices、共享Snowflake/Clock与双库，使用AsyncExitStack清理。main导出默认延迟配置app，CLI显式Settings/--env-file传入同一实例；仅连接ping，不自动执行迁移、索引或恢复。
+
+HTTP兼容在app/transport、body_reader、json_errors/json_tokens、form_body中实现；SDK解压在integrations/http，类型声明在typings。按字符集校验→有界解压→解码→DTO顺序处理，规范化值重放给FastAPI。表单嵌套保留非标量形状供v1标量字段拒绝，后续复杂类型须按对应版本契约扩展。
+
+SafeExceptionMiddleware包在请求日志和协议适配外层，消费HTTP未预期异常，避免Starlette外层处理后再次抛给Uvicorn打印私有消息。core/logging只记录关联和类型。PG/BSON文本共用node_utf8_string，网络UTF-8替换不混入wordCount/UTF-16纯规则。
+
+测试共享隔离库夹具在tests/support/storage.py，差分状态/比较/执行分文件；旧integration/conftest保留类型导出以接续前版测试。范围及可靠性期望见[Task6报告](../versions/v1/task-6-report.md)。
 
 ## 问答与流式复用
 

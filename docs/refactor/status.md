@@ -5,7 +5,7 @@
 ## 当前定位
 
 - 项目：`knowledge-hub/knowledge-hub-fastapi`，独立 Git 仓库。
-- 当前版本：**v1**；阶段：**implementing（Task1–5已完成，下一项Task6；HTTP接口未实现）**。
+- 当前版本：**v1**；阶段：**implementing（Task1–6已完成，下一项Task7验收）**。
 - 当前分支：`v1`，直接从本地 main 创建。
 - 起点 main SHA：`5e43438`（空的仓库初始化提交）。当前 HEAD 使用 `git rev-parse HEAD` 查询；不在同一提交中自引用提交 SHA。
 - 当前无 remote；尚未合并、推送、发布或打标签。
@@ -25,18 +25,20 @@
 - [x] Task 3：兼容迁移、双库读取/BSON映射、独立连接池文档锁和持久操作日志；完整133项测试无跳过，独立审查无待修复项。
 - [x] Task4：创建与查询用例、可恢复创建、事务行锁屏障及空正文防迟到标记；审查1项BIGINT问题已修复，完整172项无跳过。
 - [x] Task5：修改/软删除用例、完整恢复、内部CAS屏障、并发保护及独立恢复CLI；NUL快照问题经RED→GREEN修复，完整242项无跳过。
+- [x] Task6：五个FastAPI文档接口、原请求/错误/传输、双库生命周期、日志与入口；原75项双库差分、65项传输及SQL文本编码补证通过。独立审查3项Important经同轮修复，最终444项无跳过、覆盖94.85%，见[需求与实现报告](../versions/v1/task-6-report.md)。
 
 ## 尚未完成
 
-- [ ] Task6：FastAPI服务骨架、五接口、协议/错误/生命周期适配及完整新旧差分。
-- [ ] CI 门禁、单元/集成/契约/E2E、覆盖率和实测 README。
+- [ ] Task7：CI工作流、干净环境安装/正式启动实测、完整回归与验收记录；本轮既有单元/真实库/契约/E2E与覆盖率已通过，不能替代上述剩余事项。
 - [ ] v1 验收、合并 main；v2–v21 全部未开始。
 
 ## 下一项可直接执行的任务
 
-按[v1计划](../superpowers/plans/2026-10-28-v1.md) **Task6：FastAPI五接口与兼容适配**开始。先核对Git，读取[v1规格](../versions/v1/spec.md)、[契约](../contracts/v1.md)、[Task5报告](../versions/v1/task-5-report.md)及D020–D024。当前store已完整实现DocumentStore，五个应用用例可复用；从真实五接口失败测试开始，保留camelCase/字符串ID/POST201/分页/原400和500语义，不能返回默认422。lifespan显式装配/关闭双池PG和Mongo。
+按[v1计划](../superpowers/plans/2026-10-28-v1.md) **Task7：CI、实测运行说明与版本交接**开始。先核对Git实际HEAD、分支和变更；Task6开始前HEAD为abefa27，阶段提交信息为`feat(v1): expose compatible FastAPI document endpoints`，实际SHA使用Git查询。读取[v1规格](../versions/v1/spec.md)、[契约](../contracts/v1.md)、[Task6报告](../versions/v1/task-6-report.md)、D025–D029及验收模板；不要重做Task1–6。
 
-使用75份固定原版证据完成HTTP/双库差分，不覆盖expected。Mongo差分只能单独断言并排除合法operationId/rollback标记及空creationFence，不能忽略全部deleted业务记录。PATCH显式content即使相同也增版本；PATCH空正文允许，create空正文为原500；PATCH非空字段null的InvalidDocumentChange也须映射原500。外部BIGINT仍交PG原生CAST。不要重复Task1–5或提前启动v2。
+先建立`.github/workflows/quality.yml`，验证质量门禁会拒绝违规样例；干净依赖环境执行锁定安装与全部静态检查，显式开启两个DB开关并运行全套测试。仅对专用隔离资源实测迁移往返、Mongo索引、恢复CLI，以及README安装→初始化→正式`python -m knowledge_hub.main --env-file ...`监听/五接口路径。Task6已有真实TCP日志回归和真实双库ASGI闭环，尚未完成上述正式命令的干净环境整体复现。当前无remote，工作流文件和本地通过不能冒称云端CI已运行。
+
+完成需求/实现/证据/差异/限制对照，生成`docs/versions/v1/acceptance.md`；只有全部出口通过才标accepted，按既有授权本地合并main并核对合并SHA后标merged。保留v1分支；此前不创建v2、不推送/发布。071/073可靠性状态改进、074实际补偿故障、关联/时间/内部标记的精确归一化继续按Task6报告执行，不更新历史expected或忽略业务deleted记录。
 
 不要先启动 v2、改旧后端、切换有用户更改的参考工作区、或把默认 FastAPI 错误格式作为完成实现。
 
@@ -52,9 +54,11 @@ Task4最终：两个DB开关均1，完整172 passed、0 skipped，生产覆盖95
 
 Task5最终：两个DB开关均1，task5-final-015完整242 passed、0 skipped、0 failed，生产覆盖95.01%；Ruff format123文件/check、mypy strict67文件、行数64文件最长133/300、uv lock45依赖通过。新增16项用例单元+54项真实库/子进程/恢复/并发测试；独立审查确认同一自查NUL快照Important，4项RED→编码修复→40项受影响GREEN，再完整242回归。无其他Critical/Important/Minor，未二次审查。具体测试边界及需求对照见[Task5报告](../versions/v1/task-5-report.md)。
 
-Task1旧服务PID12852保持停止，本阶段没有启动HTTP。Task5验证后两个`kh-fastapi-v1-test`容器已停止并核对Exited(0)，卷保留，临时SQL schema/Mongo集合0残留。未使用旧数据卷。`.local/legacy-v1`保留源副本，`.local`内保留原始采集备份、实际测试输出和临时目录，均被忽略。当前无需要用户解除的阻塞。
+Task6最终：两个DB开关均1，task6-final-026完整444 passed、0 skipped、0 failed，生产语句+分支覆盖94.85%，约197秒。Ruff check/format最终170文件通过；mypy strict94文件、行数91生产/脚本文件最长137/300、uv锁46依赖通过。独立审查0Critical/3Important/0Minor；Uvicorn异常泄漏、解码/压缩和JSON词法经一次修复轮RED→GREEN，未二次审查。补SQL文本编码与显式dotenv回归，细节见Task6报告。
 
-当前主机系统pytest临时目录有账户权限差异；需要tmp_path时使用新命名的项目内`--basetemp=.local/pytest-runs/<本次标识>`，父目录先建立。真实库测试按[Task3复现](../versions/v1/task-3-report.md)启动两个专用容器并设两个环境开关。Task6需真实双库，原HTTP仅在确需新旧对比时启动，不重复采集覆盖历史快照。
+Task1旧服务保持停止；Task6补采的原版HTTP进程均已在各自finally停止，真实TCP Uvicorn测试在pytest内正常关闭。最终只读审计临时SQL schema/Mongo集合均0残留；两个`kh-fastapi-v1-test`容器stop后均Exited(0)，卷保留。未使用旧数据卷，参考前后端Git均干净。`.local/legacy-v1`保留源副本，`.local`内保留原始采集和实际输出，均被忽略。当前无需要用户解除的阻塞。
+
+当前主机系统pytest临时目录有账户权限差异；需要tmp_path时使用新命名的项目内`--basetemp=.local/pytest-runs/<本次标识>`，父目录先建立。真实库测试按[Task3复现](../versions/v1/task-3-report.md)启动两个专用容器并设两个环境开关。原HTTP仅在确需新旧对比时启动，不重复采集覆盖历史快照。
 
 ## 必须读取
 

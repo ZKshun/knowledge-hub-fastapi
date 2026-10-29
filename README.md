@@ -6,7 +6,7 @@
 
 ## 当前状态
 
-已完成 **v1 Task1–5**：原版基线、领域/配置/门禁、双库存储、五个应用用例，以及创建/修改/软删除的恢复和CLI。独立审查确认的NUL快照问题已修复，75份原版快照保留，当前完整 **242项通过、无跳过**。下一项Task6：FastAPI五接口与新旧差分；完整验收仍待Task7。业务闭环图描述最终目标，不表示全部功能已可用。
+已完成 **v1 Task1–6**：五个FastAPI文档接口、双库存储与恢复、生命周期、协议适配和请求日志。原75份HTTP/双库证据重放通过；另补65份原版传输证据和1份SQL文本编码证据。独立审查3项问题经同轮修复，当前完整 **444项通过、无跳过，覆盖94.85%**。下一项Task7：CI、干净环境实测运行和最终验收。业务闭环图描述最终目标，不表示后续版本功能已可用。
 
 新会话从 [AGENTS.md](AGENTS.md) 开始，随后读取 [当前进度与下一步](docs/refactor/status.md) 和 [开发 SOP](docs/refactor/agent-sop.md)。
 
@@ -64,7 +64,7 @@ Python 仓库位于本目录；同级 `../knowledge-hub-backend` 与 `../knowled
 | Agent 开发、验证、恢复和交接 | [开发 SOP](docs/refactor/agent-sop.md) |
 | 已确认的规则及其来源 | [决策记录](docs/refactor/decisions.md) |
 | v1 的具体工作 | [规格](docs/versions/v1/spec.md)、[实施计划](docs/superpowers/plans/2026-10-28-v1.md) |
-| 本阶段做了哪些需求、如何完成 | [Task 5 需求与实现报告](docs/versions/v1/task-5-report.md)、[Task 4](docs/versions/v1/task-4-report.md)、[Task 3](docs/versions/v1/task-3-report.md)、[Task 2](docs/versions/v1/task-2-report.md)、[Task 1](docs/versions/v1/task-1-report.md) |
+| 本阶段做了哪些需求、如何完成 | [Task 6 需求与实现报告](docs/versions/v1/task-6-report.md)、[Task 5](docs/versions/v1/task-5-report.md)、[Task 4](docs/versions/v1/task-4-report.md)、[Task 3](docs/versions/v1/task-3-report.md)、[Task 2](docs/versions/v1/task-2-report.md)、[Task 1](docs/versions/v1/task-1-report.md) |
 | 历次工作与证据 | [工作日志](docs/refactor/work-log.md) |
 
 ## 运行与验证
@@ -82,7 +82,7 @@ uv run --locked python scripts/check_file_limits.py
 
 Windows 当前主机临时目录有账户权限差异时，按 [基线复现](docs/versions/v1/contract-baseline.md) 指定项目内独立 `--basetemp`。真实数据库探针测试需要专用测试容器和显式环境开关；完整已验证结果见阶段报告。
 
-真实数据库验证使用`KH_RUN_STORAGE_DB_TESTS=1`，旧库探针使用`KH_RUN_LEGACY_DB_TESTS=1`；两个开关均启用并启动专用容器时，本轮完整242项通过。隔离/复现命令见[Task3报告](docs/versions/v1/task-3-report.md)，创建恢复与BIGINT语义见[Task4报告](docs/versions/v1/task-4-report.md)，修改/删除恢复、并发和NUL快照兼容见[Task5报告](docs/versions/v1/task-5-report.md)。不要把未启用数据库测试的快速检查当作v1验收。
+真实数据库验证使用`KH_RUN_STORAGE_DB_TESTS=1`，旧库探针使用`KH_RUN_LEGACY_DB_TESTS=1`；两个开关均启用并启动专用容器时，本轮完整444项通过。隔离/复现命令见[Task3报告](docs/versions/v1/task-3-report.md)，创建恢复与BIGINT语义见[Task4报告](docs/versions/v1/task-4-report.md)，修改/删除恢复见[Task5报告](docs/versions/v1/task-5-report.md)，API差分/传输/日志证据见[Task6报告](docs/versions/v1/task-6-report.md)。未启用开关的测试会跳过真实库用例，不能用于完整验收。
 
 恢复命令已提供，使用显式进程环境或`--env-file`，默认每批100条：
 
@@ -92,6 +92,15 @@ uv run --locked python scripts/recover_document_operations.py --limit 100
 
 stdout仅输出completed/compensated/failed计数；failed>0退出1，整批配置/连接异常退出2。支持`--schema`、`--collection`选择明确资源；独立子进程双库演练与重试说明见[Task5报告](docs/versions/v1/task-5-report.md)。命令不会迁移表或自动清理内部创建标记。
 
-当前没有 Python HTTP 服务启动命令；旧 NestJS 的隔离构建、采集、测试和停止步骤见 [契约基线复现](docs/versions/v1/contract-baseline.md)。后续服务命令必须在对应实现完成并实测后补齐。
+ASGI入口为`knowledge_hub.main:app`。配置进程环境或显式指定文件后启动：
+
+```bash
+uv run --locked python -m knowledge_hub.main
+uv run --locked python -m knowledge_hub.main --env-file .env
+```
+
+主入口读取PORT，默认监听127.0.0.1:8000；Swagger在`/docs`、schema在`/openapi.json`。启动检查PG/Mongo连接并管理关闭，不自动迁移表、初始化索引或恢复未决操作。空库迁移/索引步骤见Task3报告；已有无版本业务表会明确拒绝。主入口参数与帮助已验证，真实TCP隐私测试及双库ASGI闭环已通过；从干净安装到上述正式命令监听的整体复现仍属Task7。
+
+JSON与表单的展开正文上限保持原100KB；兼容gzip/deflate/br及UTF-8/16/32，失败按原400/413/415返回。仅记录请求ID、方法、状态、耗时和异常类型，未预期HTTP异常不会再次交给Uvicorn打印原消息。旧NestJS隔离运行和停止步骤见[契约基线复现](docs/versions/v1/contract-baseline.md)。
 
 配置保留旧 `POSTGRES_*`、`MONGO_URI`、`SNOWFLAKE_*`、`PORT` 名称，见 [.env.example](.env.example)。显式调用 `Settings()` 时读取进程环境；需要 dotenv 时显式传 `Settings(_env_file=...)`。模块导入不读取配置、不建立连接。默认端口 8000；连接值是开发占位。每个活动进程须分配唯一 worker ID，并共享相同 epoch；进程内共享同一生成器。时间回拨或单毫秒超过 4096 个 ID 时明确失败，部署与重试说明见 [阶段报告](docs/versions/v1/task-2-report.md)。

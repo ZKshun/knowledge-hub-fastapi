@@ -28,6 +28,11 @@
 | D022 | 2026-10-28 | 实施默认值/Task 4 审查修复 | 外部BIGINT字符串使用绑定Text参数后由PostgreSQL原生CAST解析，覆盖外键/操作者写入、筛选、路由查询/pending门禁及锁键规范化；禁止Python int/strip改变PG接受集合。内部生成或从数据库读取的规范十进制ID仍可绑定数值 |
 | D023 | 2026-10-29 | 实施默认值/Task5故障协议 | 修改/删除Mongo CAS同时匹配公开version和内部operationId；补偿原子匹配原状态、本次已写状态或同一次补偿状态，恢复原正文/版本/删除标志并设置固定rollback:<operation_id>新屏障，绝不恢复旧operationId，防公开版本回退后迟到CAS再次命中。私有恢复快照只入受控SQL日志，普通日志/CLI不输出正文；代价是内部标记可变而公开版本不变 |
 | D024 | 2026-10-29 | 实施默认值/Task5自查与审查修复 | JSONB恢复快照中的旧正文/摘要以UTF-8→Base64编码，保留null与空串差别；补偿严格解码恢复。原因是BSON允许NUL但PG JSONB拒绝，不能让内部日志缩小原接口允许内容。Base64是可逆编码而非加密，仍受数据库权限控制；代价为快照文本约三分之一存储开销 |
+| D025 | 2026-10-29 | 实施默认值/Task6差分 | 逐例恢复原版前态，注入源文档ID、按documentId绑定新ObjectId；仅新/变化时刻归一化且核对格式/请求窗口/API-SQL关系，旧时刻严格相等。071/073仅对原版非原子失败状态作已允许的可靠性期望修正，074证明新补偿故障可检测/重试；另做连续真实双库E2E，不能忽略全部deleted正文 |
+| D026 | 2026-10-29 | 实施默认值/Task6配置 | ASGI导出在导入时只建立路由/schema，不读Settings或联网；默认Settings延迟至lifespan，显式create_app(Settings, document_store=...)仍可注入。CLI --env-file显式构造同一配置并传给ASGI，PORT默认8000；启动ping并关闭Mongo/PG双池，不隐式DDL或恢复 |
+| D027 | 2026-10-29 | 实施默认值/Task6原版运行 | HTTP解析、路由大小写/尾斜杠/HEAD、原错误顺序和字符串/数组message属于兼容边界；JSON/表单/字符集/压缩按原版顺序处理，展开正文100KB，字段类型保留缺失/null/JS Number。Node UTF-8替换同时用于PG文本与BSON，API原输入和持久化读回差别按原版保留 |
+| D028 | 2026-10-29 | 实施默认值/Task6审查修复 | 应用内消费未预期HTTP异常，仅记录类型并返回脱敏500；不能仅靠Exception handler返回500后仍让Starlette重抛给Uvicorn记录完整消息。用真实TCP Uvicorn回归证明普通日志不含正文sentinel；只记录请求ID/方法/状态/耗时，不记body/query |
+| D029 | 2026-10-29 | 实施默认值/Task6依赖 | 为原br请求兼容新增Brotli>=1.2.1,<2，当前锁1.2.1；解压SDK隔离integrations/http并限制输出/展开长度。typings/brotli.pyi仅声明实际使用的官方SDK接口，mypy strict使用该精确边界而非宽泛ignore；代价为一个依赖和有界解码/规范化开销，无Node生产依赖 |
 
 ## 变更规则
 

@@ -1,6 +1,6 @@
 # v1：文档与工程基线规格
 
-总体方向已接受。来源：旧后端 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；接口字段和副作用详见 [v1 契约](../../contracts/v1.md)。Task1–5已完成，Task5的NUL快照审查问题经RED→GREEN及完整242项回归修复；HTTP闭环与验收待Task6–7。
+总体方向已接受。来源：旧后端 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；接口字段和副作用详见 [v1 契约](../../contracts/v1.md)。Task1–6已完成，五接口和原75项真实双库差分通过，最终444项无跳过、覆盖94.85%；Task6审查3项Important经同轮修复。CI、干净环境运行及完整验收留Task7。
 
 ## 目标与边界
 
@@ -33,6 +33,8 @@
 
 Task 2 已明确的共享接口与限制见 [阶段报告](task-2-report.md)。Document/Detail/Page 为 frozen dataclass，分页 items 为元数据 tuple；纯领域不做 HTTP 校验/强制数值外键。Settings 默认不隐式读取 `.env`。雪花生成器仅保证同一实例内的序列状态，部署必须保证活动进程 worker 唯一；不把此阶段单元测试当作完整部署验收。
 
+Task6的`create_app(settings: Settings | None = None, *, document_store: DocumentStore | None = None)`支持显式注入；默认延迟到lifespan读取配置，导入无网络或环境读取。CLI支持显式`--env-file`并将同一Settings交给应用；lifespan检查连接、关闭PG双池/Mongo，不自动迁移、初始化索引或恢复。原错误/传输/文本编码及日志边界见[Task6报告](task-6-report.md)。
+
 ## 持久化和一致性
 
 Alembic 建立原版 `kh_document` 的兼容结构和内部操作日志，Mongo 初始化原集合及索引。空库迁移必须成功；已有旧库的 baseline/导入不在 v1 自动执行，须显式检测并拒绝静默覆盖。
@@ -51,7 +53,7 @@ COMMIT 回包丢失属于结果未知，不得因客户端异常直接补偿。�
 
 同文档写入使用 PostgreSQL 文档级锁并带版本条件保护；持有锁到本次 SQL 提交/补偿完成。恢复过程也遵循锁顺序。创建时的锁以文档 ID 标识；不能要求文档行已经存在。幂等恢复不得增加第二次版本或复活软删除文档。
 
-Task 3 的客户端、读存储、锁和日志共享接口及事务证据见 [阶段报告](task-3-report.md)。后续锁必须使用独立lock_engine；事务池与锁池分别关闭。prepared独立提交、metadata与completed共事务，以及同文档单一pending约束已经验证；实际恢复与HTTP兼容仍需Task4–7证明。
+Task 3 的客户端、读存储、锁和日志共享接口及事务证据见 [阶段报告](task-3-report.md)。后续锁必须使用独立lock_engine；事务池与锁池分别关闭。prepared独立提交、metadata与completed共事务，以及同文档单一pending约束已经验证；Task4–5已完成真实库恢复验证，Task6完成HTTP差分，最终验收仍需Task7。
 
 ## 必须验证的行为
 
