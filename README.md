@@ -6,7 +6,7 @@
 
 ## 当前状态
 
-已完成 **v1 Task1–6**，Task7正在验收：五个FastAPI文档接口、双库存储与恢复、生命周期、协议适配和请求日志。原75份HTTP/双库证据重放通过；另补65份原版传输证据和1份SQL文本编码证据。独立审查3项问题经同轮修复。Task7的新依赖环境与全新双库完整 **445项通过、0跳过，覆盖94.85%**；本地合并状态以[当前进度](docs/refactor/status.md)为准。业务闭环图描述最终目标，不表示后续版本功能已可用。
+**v1 五个 FastAPI 文档接口、双库存储与恢复、生命周期及协议适配已通过本地验收**。原75份HTTP/双库证据重放通过；另补71份原版传输证据和1份SQL文本编码证据。新锁定环境与全新双库完整 **451项通过、0跳过，覆盖94.71%**；独立审查问题经原版证据驱动修复。本地合并状态以[当前进度](docs/refactor/status.md)为准。业务闭环图描述最终目标，后续版本功能尚未实现。
 
 新会话从 [AGENTS.md](AGENTS.md) 开始，随后读取 [当前进度与下一步](docs/refactor/status.md) 和 [开发 SOP](docs/refactor/agent-sop.md)。
 
@@ -110,6 +110,6 @@ uv run --locked pytest tests/unit tests/integration tests/contract tests/e2e -q 
 docker compose -p kh-fastapi-v1-test -f deploy/compose.test.yml stop
 ```
 
-Windows临时目录权限不同时给pytest增加新的项目内`--basetemp=.local/pytest-runs/<标识>`，先建父目录；不开两个DB开关会跳过真实库用例，不能算完整验收。[质量工作流](.github/workflows/quality.yml)复用这些命令，但当前Python仓库无remote，云端运行未发生。原版75项HTTP/双库证据、65项传输证据和文本编码证据已版本化，无需构建Nest服务即可重放；重新采集原版的隔离流程见[基线复现](docs/versions/v1/contract-baseline.md)。`stop`保留本项目测试卷和数据。
+Windows临时目录权限不同时给pytest增加新的项目内`--basetemp=.local/pytest-runs/<标识>`，先建父目录；不开两个DB开关会跳过真实库用例，不能算完整验收。[质量工作流](.github/workflows/quality.yml)复用这些命令，但当前Python仓库无remote，云端运行未发生。原版75项HTTP/双库证据、71项传输证据和文本编码证据已版本化，无需构建Nest服务即可重放；重新采集原版的隔离流程见[基线复现](docs/versions/v1/contract-baseline.md)。`stop`保留本项目测试卷和数据。
 
 JSON与表单的展开正文上限是100KB；兼容gzip/deflate/br及UTF-8/16/32，失败按原400/413/415返回。请求日志只记录ID、方法、状态、耗时和异常类型。配置名称与占位示例见[.env.example](.env.example)，不会隐式读取本地.env；每个活动进程须分配唯一Snowflake worker ID并共享相同epoch，时间回拨或单毫秒超过4096个ID时明确失败，见[Task2报告](docs/versions/v1/task-2-report.md)。

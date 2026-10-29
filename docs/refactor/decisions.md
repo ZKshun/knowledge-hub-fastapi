@@ -34,6 +34,7 @@
 | D028 | 2026-10-29 | 实施默认值/Task6审查修复 | 应用内消费未预期HTTP异常，仅记录类型并返回脱敏500；不能仅靠Exception handler返回500后仍让Starlette重抛给Uvicorn记录完整消息。用真实TCP Uvicorn回归证明普通日志不含正文sentinel；只记录请求ID/方法/状态/耗时，不记body/query |
 | D029 | 2026-10-29 | 实施默认值/Task6依赖 | 为原br请求兼容新增Brotli>=1.2.1,<2，当前锁1.2.1；解压SDK隔离integrations/http并限制输出/展开长度。typings/brotli.pyi仅声明实际使用的官方SDK接口，mypy strict使用该精确边界而非宽泛ignore；代价为一个依赖和有界解码/规范化开销，无Node生产依赖 |
 | D030 | 2026-10-29 | 实施默认值/Task7干净环境 | 测试Compose挂载版本化的原版PostgreSQL初始化SQL，契约测试以原75份manifest中的源码哈希逐字节核验；避免新克隆依赖被忽略的.local旧服务导出。质量工作流以只读权限和固定[checkout v7.0.1](https://github.com/actions/checkout/releases/tag/v7.0.1)、[setup-uv v10.3.2](https://github.com/astral-sh/setup-uv/releases/tag/v10.3.2)运行锁定Python3.12、静态门禁及双库全套测试；无remote时只能称本地命令通过，不能称云端CI已运行。代价为仓库多一个仅测试用的原版DDL副本和CI专用容器资源 |
+| D031 | 2026-10-29 | 实施默认值/Task7全分支审查修复 | v1错误响应也属于精确HTTP契约：URL表单根级`[x]`/`[]`/`[0]`应成为待校验字段，不能静默丢弃并创建文档；JSON和查询对象的数字索引键须按JavaScript枚举顺序（`0`至`4294967294`先升序，`01`和`4294967295`按原插入顺序）产生未知字段错误。固定旧服务真实HTTP采样另存补充证据，原75份expected不变；代价为仅在请求解析/校验层做一次稳定键排序。审查原列为Minor的错误顺序依用户精确兼容要求上调为Important并与表单问题同轮修复。 |
 
 ## 变更规则
 

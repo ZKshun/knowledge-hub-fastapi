@@ -5,10 +5,10 @@
 ## 当前定位
 
 - 项目：`knowledge-hub/knowledge-hub-fastapi`，独立 Git 仓库。
-- 当前版本：**v1**；阶段：**verifying（Task1–6已完成，Task7执行中）**。
+- 当前版本：**v1**；阶段：**accepted（Task1–7本地验收通过，等待既定本地合并main）**。
 - 当前分支：`v1`，直接从本地 main 创建。
 - 起点 main SHA：`5e43438`（空的仓库初始化提交）。当前 HEAD 使用 `git rev-parse HEAD` 查询；不在同一提交中自引用提交 SHA。
-- 当前无 remote；尚未合并、推送、发布或打标签。
+- 当前无 remote；v1已验收但尚未合并、推送、发布或打标签。
 - 来源后端 v1：`f9dfce20ffe798dc35ede0a74219f06bf3d6980f`。
 - 参考后端本地 main：`b4dc6b2`，与本地 origin/main 一致，已取代旧的 v6 结论。
 
@@ -26,25 +26,15 @@
 - [x] Task4：创建与查询用例、可恢复创建、事务行锁屏障及空正文防迟到标记；审查1项BIGINT问题已修复，完整172项无跳过。
 - [x] Task5：修改/软删除用例、完整恢复、内部CAS屏障、并发保护及独立恢复CLI；NUL快照问题经RED→GREEN修复，完整242项无跳过。
 - [x] Task6：五个FastAPI文档接口、原请求/错误/传输、双库生命周期、日志与入口；原75项双库差分、65项传输及SQL文本编码补证通过。独立审查3项Important经同轮修复，最终444项无跳过、覆盖94.85%，见[需求与实现报告](../versions/v1/task-6-report.md)。
+- [x] Task7：版本化原版SQL测试夹具、只读固定Action质量工作流、锁定依赖干净安装、全新隔离双库和正式CLI真实TCP实测；全分支审查发现的表单根级键与数字错误顺序已由真实旧服务证据RED→GREEN修复，最终451项0跳过、覆盖94.71%，静态门禁及文档审计通过；见[验收记录](../versions/v1/acceptance.md)。云端CI因无remote未运行。
 
 ## 尚未完成
 
-- [ ] Task7：CI工作流、干净环境安装/正式启动实测、完整回归与验收记录；本轮既有单元/真实库/契约/E2E与覆盖率已通过，不能替代上述剩余事项。
-- [ ] v1 验收、合并 main；v2–v21 全部未开始。
+- [ ] 把已验收v1本地合并main并核对合并SHA/关键回归；v2–v21全部未开始。
 
 ## 下一项可直接执行的任务
 
-2026-10-29：Task7已启动，基准HEAD为`b9075b66790b94a537a16e3f14a37a93aaf8ab97`。发现原测试Compose依赖被忽略的`.local/legacy-v1` PostgreSQL脚本，干净克隆不可复现；已将与固定原版manifest哈希相同的脚本复制为版本化测试夹具并将Compose挂载改至该夹具，契约测试RED→GREEN。CI、干净安装、完整运行与验收仍在执行；不要把本段当作完成证据。
-
-Task7截至当前的实际结果：新锁定Python环境46依赖安装；新Compose卷原版测试表23列、0行；完整445 passed、0 skipped、94.85%；Ruff170文件、mypy strict94文件、行数91文件最长137。独立空应用库迁移升级→降级→升级、Mongo索引两次和恢复命令全0，正式模块进程真实TCP五接口与SQL/Mongo状态通过。CI文件YAML/Compose配置已本地解析，因无remote云端Actions未运行。当前仍处合并前审查和文档收尾，验收记录状态verifying；具体逐项证据见[验收记录](../versions/v1/acceptance.md)。
-
-按[v1计划](../superpowers/plans/2026-10-28-v1.md) **Task7：CI、实测运行说明与版本交接**开始。先核对Git实际HEAD、分支和变更；Task6开始前HEAD为abefa27，阶段提交信息为`feat(v1): expose compatible FastAPI document endpoints`，实际SHA使用Git查询。读取[v1规格](../versions/v1/spec.md)、[契约](../contracts/v1.md)、[Task6报告](../versions/v1/task-6-report.md)、D025–D029及验收模板；不要重做Task1–6。
-
-先建立`.github/workflows/quality.yml`，验证质量门禁会拒绝违规样例；干净依赖环境执行锁定安装与全部静态检查，显式开启两个DB开关并运行全套测试。仅对专用隔离资源实测迁移往返、Mongo索引、恢复CLI，以及README安装→初始化→正式`python -m knowledge_hub.main --env-file ...`监听/五接口路径。Task6已有真实TCP日志回归和真实双库ASGI闭环，尚未完成上述正式命令的干净环境整体复现。当前无remote，工作流文件和本地通过不能冒称云端CI已运行。
-
-完成需求/实现/证据/差异/限制对照，生成`docs/versions/v1/acceptance.md`；只有全部出口通过才标accepted，按既有授权本地合并main并核对合并SHA后标merged。保留v1分支；此前不创建v2、不推送/发布。071/073可靠性状态改进、074实际补偿故障、关联/时间/内部标记的精确归一化继续按Task6报告执行，不更新历史expected或忽略业务deleted记录。
-
-不要先启动 v2、改旧后端、切换有用户更改的参考工作区、或把默认 FastAPI 错误格式作为完成实现。
+2026-10-29：v1验收已通过，完整证据见[验收记录](../versions/v1/acceptance.md)。当前v1工作树含验收文档和审查修复，先核对Git分支/变更并保存本地提交；然后按[开发SOP](agent-sop.md)将v1以`--no-ff`合并至main，核对合并SHA，运行合并后关键契约/端到端回归，更新验收记录/状态为merged。没有remote，不推送/发布，不提前创建v2。当前完成前不把本地accepted写成merged。
 
 ## 验证与运行资源
 

@@ -27,12 +27,23 @@ ENUM_LABELS = ("Draft", "Published", "Archived")
 def object_fields(value: object) -> dict[str, object]:
     if isinstance(value, Mapping):
         # class-transformer drops these prototype keys before whitelist validation.
-        return {
+        data = {
             str(key): item for key, item in value.items() if key not in ("__proto__", "constructor")
         }
+        return {key: data[key] for key in sorted(data, key=_javascript_key_order)}
     if isinstance(value, list):
         return {str(index): item for index, item in enumerate(value)}
     return {}
+
+
+def _javascript_key_order(key: str) -> tuple[int, int]:
+    # JavaScript enumerates array-index keys first; the upper bound is exclusive.
+    if key.isascii() and key.isdecimal() and (key == "0" or not key.startswith("0")):
+        if len(key) <= 10:
+            index = int(key)
+            if index < 4_294_967_295:
+                return 0, index
+    return 1, 0
 
 
 def validate_body(value: object, *, partial: bool) -> dict[str, object]:

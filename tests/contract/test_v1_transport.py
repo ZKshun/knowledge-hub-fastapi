@@ -19,7 +19,8 @@ SUPPLEMENT = json.loads((FIXTURES / "v1-http-boundaries.json").read_text(encodin
     ids=lambda c: c.get("reviewSupplement") or c["method"] + c["path"] + str(c.get("rawBody"))[:80],
 )
 async def test_real_legacy_transport_behavior_is_preserved(case):
-    app = create_app(Settings(_env_file=None), document_store=MemoryStore())
+    store = MemoryStore()
+    app = create_app(Settings(_env_file=None), document_store=store)
     body = case["rawBody"]
     if "rawBodyHex" in case:
         body = bytes.fromhex(case["rawBodyHex"])
@@ -52,6 +53,8 @@ async def test_real_legacy_transport_behavior_is_preserved(case):
         assert response.json() == json.loads(case["body"])
     if case["method"] == "HEAD":
         assert response.content == b""
+    if case.get("reviewSupplement") == "review-final-rootless-form":
+        assert store.documents == {}
 
 
 def test_supplement_uses_same_compiled_fixed_source_as_original_baseline():

@@ -821,6 +821,80 @@
       "body": "{\"message\":[\"title must be a string\"],\"error\":\"Bad Request\",\"statusCode\":400}",
       "allow": null,
       "reviewSupplement": "constructor"
+    },
+    {
+      "method": "POST",
+      "path": "/documents",
+      "rawBody": "title=abc&content=def&[x]=1",
+      "rawBodySha256": "db23be34b2f3cff12a85edaab080789fe3a8d91c2a77918c0689a781136f18a4",
+      "requestContentType": "application/x-www-form-urlencoded",
+      "requestContentEncoding": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"message\":[\"property x should not exist\"],\"error\":\"Bad Request\",\"statusCode\":400}",
+      "allow": null,
+      "reviewSupplement": "review-final-rootless-form"
+    },
+    {
+      "method": "POST",
+      "path": "/documents",
+      "rawBody": "title=abc&content=def&[]=1",
+      "rawBodySha256": "c91c2bf63608fa2369708aeadcd1c366a109a2f3a7c47609f99840e1b837a799",
+      "requestContentType": "application/x-www-form-urlencoded",
+      "requestContentEncoding": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"message\":[\"property 0 should not exist\"],\"error\":\"Bad Request\",\"statusCode\":400}",
+      "allow": null,
+      "reviewSupplement": "review-final-rootless-form"
+    },
+    {
+      "method": "POST",
+      "path": "/documents",
+      "rawBody": "title=abc&content=def&[0]=1",
+      "rawBodySha256": "4a268deab0c7b8bd15dc73b4124792ba60df908b102af4c43b75584831ca6024",
+      "requestContentType": "application/x-www-form-urlencoded",
+      "requestContentEncoding": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"message\":[\"property 0 should not exist\"],\"error\":\"Bad Request\",\"statusCode\":400}",
+      "allow": null,
+      "reviewSupplement": "review-final-rootless-form"
+    },
+    {
+      "method": "POST",
+      "path": "/documents",
+      "rawBody": "{\"2\":0,\"1\":0,\"title\":1,\"content\":1}",
+      "rawBodySha256": "66c4346a9bdcf3881bc3805d09bfbcca2fcd7d19e2ee44137fb9d288e075f4bd",
+      "requestContentType": "application/json",
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"message\":[\"property 1 should not exist\",\"property 2 should not exist\",\"title must be a string\",\"content must be a string\"],\"error\":\"Bad Request\",\"statusCode\":400}",
+      "allow": null,
+      "reviewSupplement": "review-final-js-key-order"
+    },
+    {
+      "method": "POST",
+      "path": "/documents",
+      "rawBody": "{\"2\":0,\"01\":0,\"4294967295\":0,\"1\":0,\"title\":1,\"content\":1}",
+      "rawBodySha256": "ddbaa1f41fbbcf57fe652281dbbef2f15b645ac0ded26f5eb1ebf4d8e2bbe5f9",
+      "requestContentType": "application/json",
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"message\":[\"property 1 should not exist\",\"property 2 should not exist\",\"property 01 should not exist\",\"property 4294967295 should not exist\",\"title must be a string\",\"content must be a string\"],\"error\":\"Bad Request\",\"statusCode\":400}",
+      "allow": null,
+      "reviewSupplement": "review-final-js-key-order"
+    },
+    {
+      "method": "GET",
+      "path": "/documents?2=x&1=y",
+      "rawBody": null,
+      "requestContentType": null,
+      "status": 400,
+      "contentType": "application/json; charset=utf-8",
+      "body": "{\"message\":[\"property 1 should not exist\",\"property 2 should not exist\"],\"error\":\"Bad Request\",\"statusCode\":400}",
+      "allow": null,
+      "reviewSupplement": "review-final-js-key-order"
     }
   ]
 }
