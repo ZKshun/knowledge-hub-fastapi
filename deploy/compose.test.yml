@@ -1,0 +1,37 @@
+name: kh-fastapi-v1-test
+
+services:
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_USER: kh_test
+      POSTGRES_PASSWORD: local-contract-only
+      POSTGRES_DB: knowledge_hub_fastapi_test
+      TZ: UTC
+    ports:
+      - "127.0.0.1:${KH_TEST_POSTGRES_PORT:-55432}:5432"
+    volumes:
+      - postgres_test:/var/lib/postgresql/data
+      - ../tests/fixtures/legacy_v1/postgresql:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kh_test -d knowledge_hub_fastapi_test"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+  mongo:
+    image: mongo:7-jammy
+    command: ["mongod", "--bind_ip_all", "--setParameter", "enableTestCommands=1"]
+    ports:
+      - "127.0.0.1:${KH_TEST_MONGO_PORT:-57017}:27017"
+    volumes:
+      - mongo_test:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping')"]
+      interval: 2s
+      timeout: 3s
+      retries: 30
+
+volumes:
+  postgres_test:
+  mongo_test:

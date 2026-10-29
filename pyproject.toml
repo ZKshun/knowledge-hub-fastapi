@@ -1,0 +1,63 @@
+[build-system]
+requires = ["hatchling>=1.26,<2"]
+build-backend = "hatchling.build"
+
+[project]
+name = "knowledge-hub-fastapi"
+version = "0.1.0"
+description = "Versioned FastAPI migration of the Knowledge Hub backend"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+    "alembic>=1.15,<2",
+    "asyncpg>=0.30,<1",
+    "brotli>=1.2.1,<2",
+    "fastapi>=0.115,<1",
+    "pydantic-settings>=2.8,<3",
+    "pymongo>=4.13,<5",
+    "sqlalchemy[asyncio]>=2.0,<3",
+    "uvicorn>=0.34,<1",
+]
+
+[dependency-groups]
+dev = [
+    "httpx>=0.28,<1",
+    "mypy>=1.15,<2",
+    "psycopg[binary]>=3.2,<4",
+    "pytest>=8.3,<10",
+    "pytest-asyncio>=0.25,<2",
+    "pytest-cov>=6,<8",
+    "ruff>=0.11,<1",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/knowledge_hub"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = [".", "src"]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+
+[tool.ruff]
+target-version = "py312"
+line-length = 100
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP", "B", "ASYNC", "C901"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.mypy]
+mypy_path = ["typings"]
+python_version = "3.12"
+strict = true
+plugins = ["pydantic.mypy"]
+
+[tool.coverage.run]
+source = ["knowledge_hub"]
+branch = true
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 85
