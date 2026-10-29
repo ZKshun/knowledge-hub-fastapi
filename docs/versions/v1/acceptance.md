@@ -1,7 +1,7 @@
 # v1 文档服务验收记录
 
-- 日期与执行者：2026-10-29，Codex；状态：**accepted，本地合并main待执行**。
-- Python分支：`v1`；Task7开始前HEAD `b9075b66790b94a537a16e3f14a37a93aaf8ab97`；本轮工作树内容通过下述命令验证。阶段提交及合并SHA以后续Git记录为准，不能自引用尚未产生的提交。
+- 日期与执行者：2026-10-29，Codex；状态：**merged，本地main已核对**。
+- Python实现分支：`v1`，验收修复提交`75f62ed639f784cac5c2e039ac9afcb622327aa5`；Task7开始前HEAD `b9075b66790b94a537a16e3f14a37a93aaf8ab97`。本地main合并提交`d1d4a2703d6be62a4ce11efad9627fe874e897a6`，其两亲为起点main和v1验收提交，合并树与v1树同为`cfd0081eef5c68a4558b018315244899cbacdf84`。
 - 来源：NestJS v1 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；Python起点main `5e43438819bb660612799983c6af52bdef99941e`。
 - 依据：[规格](spec.md)、[计划](../../superpowers/plans/2026-10-28-v1.md)、[契约](../../contracts/v1.md)、[决策](../../refactor/decisions.md)。
 - 环境：Windows、Python3.12.14、uv0.12.15、锁定46依赖；全新`.local/task7-venv`；本轮全新`kh-fastapi-v1-acceptance`专用PostgreSQL16/Mongo7容器、回环端口55432/57017，旧参考仓库只读。
@@ -29,11 +29,12 @@
 | 两个DB开关均1的`uv run --locked pytest tests/unit tests/integration tests/contract tests/e2e -q --basetemp=.local/pytest-runs/task7-full-001 --cov=knowledge_hub --cov-report=term-missing --cov-fail-under=85` | 退出0；**445 passed、0 skipped、94.85%**，177.55秒；完整输出保存在忽略的`.local/task7-full.log` |
 | 审查修复后首次完整回归`--basetemp=.local/pytest-runs/task7-post-review-final-001`，两个DB开关均1、覆盖率门槛85% | 退出0；451 passed、0 skipped、93.89%，186.21秒；其间拆分表单辅助函数以满足圈复杂度门禁，因此此轮覆盖率仅作中间证据 |
 | **最终代码**完整回归`--basetemp=.local/pytest-runs/task7-final-code-002`，两个DB开关均1、覆盖率门槛85% | 退出0；**451 passed、0 skipped、94.71%**，180.64秒，输出`.local/task7-final-code.log` |
+| 合并main后原版契约与端到端关键回归`--basetemp=.local/pytest-runs/task7-post-merge-001`，两个DB开关均1 | 退出0；**197 passed、0 skipped**，50.66秒，输出`.local/task7-post-merge.log`；验收Compose两个容器之后`stop`，均Exited(0)，卷保留 |
 | 300/301行、mypy错误返回类型、契约把字符串ID变数字的反向门禁 | 行数10项通过；故意错误类型mypy退出1；故意错误契约pytest退出1且准确指出`$.id`类型不符；临时输入位于忽略的`.local/task7-negative` |
 | 全新Compose卷及独立空应用库 | 原测试库`kh_document`23列/0行；应用库Alembic升级→降级→升级后23列、版本0001；Mongo两次索引初始化成功；CLI恢复空队列计数全0 |
 | `.local/task7-venv/Scripts/python.exe -m knowledge_hub.main --env-file .local/task7-app.env` | 正式进程启动成功；真实回环TCP五接口、Swagger/OpenAPI、PG与Mongo状态/关联通过；仅本轮进程停止，38121无残留监听 |
 | 全量后资源检查 | 临时SQL schema与Mongo集合各0残留；合成应用库索引`documentId_1`唯一，恢复队列全0 |
-| 最终审计 | 原65项传输样本逐项未变、补充证据共71项，75份原双库expected未改；25份Markdown、124个相对链接均有效，围栏成对；AGENTS 30行；`git diff --check`退出0；3101/38121无监听；测试临时SQL schema与Mongo集合各0残留 |
+| 最终审计 | 原65项传输样本逐项未变、补充证据共71项，75份原双库expected未改；合并后25份Markdown、126个相对链接均有效，围栏成对；AGENTS 30行；`git diff --check`退出0；3101/38121无监听；测试临时SQL schema与Mongo集合各0残留 |
 
 ## 差异、审查与保留边界
 
@@ -47,6 +48,6 @@
 
 ## 集成与交接
 
-- 本地Task7阶段提交：`50e8da7`；审查修复后的提交SHA以Git查询；全分支审查与最终修复/回归如上；本地main合并：**未合并**。
-- 用户已授权逐版验收通过后本地合并main；没有推送/发布授权。v2只能从合并后的main派生。
-- 合并前v1验收已通过；实际合并SHA及合并后关键回归须在执行后记录，未产生前不能写merged。后续会话以[当前状态](../../refactor/status.md)和Git核对。
+- 本地Task7阶段提交：`50e8da7`；最终v1提交：`75f62ed639f784cac5c2e039ac9afcb622327aa5`；本地main合并：`d1d4a2703d6be62a4ce11efad9627fe874e897a6`；合并后197项关键回归通过。全分支审查及修复范围如上。
+- 当前无remote；没有推送、PR、标签或发布，云端CI未运行。v1分支保留，v2尚未创建，只能从已更新的main派生。
+- 下一会话以[当前状态](../../refactor/status.md)和Git核对，再按路线图准备v2。

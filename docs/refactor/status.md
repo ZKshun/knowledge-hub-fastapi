@@ -5,10 +5,9 @@
 ## 当前定位
 
 - 项目：`knowledge-hub/knowledge-hub-fastapi`，独立 Git 仓库。
-- 当前版本：**v1**；阶段：**accepted（Task1–7本地验收通过，等待既定本地合并main）**。
-- 当前分支：`v1`，直接从本地 main 创建。
-- 起点 main SHA：`5e43438`（空的仓库初始化提交）。当前 HEAD 使用 `git rev-parse HEAD` 查询；不在同一提交中自引用提交 SHA。
-- 当前无 remote；v1已验收但尚未合并、推送、发布或打标签。
+- 最新交付：**v1 merged**；下一版本：**v2 planned，分支尚未创建**。
+- 当前分支：`main`；v1从原main `5e43438819bb660612799983c6af52bdef99941e`派生，验收提交`75f62ed639f784cac5c2e039ac9afcb622327aa5`，本地合并提交`d1d4a2703d6be62a4ce11efad9627fe874e897a6`。本文件后续文档提交可能使main HEAD前进，始终先以Git核对。
+- 当前无 remote；v1已本地合并，未推送、发布或打标签；云端CI未运行。
 - 来源后端 v1：`f9dfce20ffe798dc35ede0a74219f06bf3d6980f`。
 - 参考后端本地 main：`b4dc6b2`，与本地 origin/main 一致，已取代旧的 v6 结论。
 
@@ -27,14 +26,15 @@
 - [x] Task5：修改/软删除用例、完整恢复、内部CAS屏障、并发保护及独立恢复CLI；NUL快照问题经RED→GREEN修复，完整242项无跳过。
 - [x] Task6：五个FastAPI文档接口、原请求/错误/传输、双库生命周期、日志与入口；原75项双库差分、65项传输及SQL文本编码补证通过。独立审查3项Important经同轮修复，最终444项无跳过、覆盖94.85%，见[需求与实现报告](../versions/v1/task-6-report.md)。
 - [x] Task7：版本化原版SQL测试夹具、只读固定Action质量工作流、锁定依赖干净安装、全新隔离双库和正式CLI真实TCP实测；全分支审查发现的表单根级键与数字错误顺序已由真实旧服务证据RED→GREEN修复，最终451项0跳过、覆盖94.71%，静态门禁及文档审计通过；见[验收记录](../versions/v1/acceptance.md)。云端CI因无remote未运行。
+- [x] v1验收后以`--no-ff`本地合并main，合并树与v1验收树相同；合并后原版契约/E2E关键回归197项通过、0跳过。v1分支保留。
 
 ## 尚未完成
 
-- [ ] 把已验收v1本地合并main并核对合并SHA/关键回归；v2–v21全部未开始。
+- [ ] v2–v21全部未开始；v2尚无分支、规格、契约或实现。当前无remote，云端CI仍待将来托管平台运行。
 
 ## 下一项可直接执行的任务
 
-2026-10-29：v1验收已通过，完整证据见[验收记录](../versions/v1/acceptance.md)。当前v1工作树含验收文档和审查修复，先核对Git分支/变更并保存本地提交；然后按[开发SOP](agent-sop.md)将v1以`--no-ff`合并至main，核对合并SHA，运行合并后关键契约/端到端回归，更新验收记录/状态为merged。没有remote，不推送/发布，不提前创建v2。当前完成前不把本地accepted写成merged。
+下次按用户要求开始v2时：先核对main实际HEAD/工作区及[验收记录](../versions/v1/acceptance.md)，读取[开发SOP](agent-sop.md)、[版本路线](roadmap.md)及旧NestJS v2来源；从**更新后的main**新建`v2`，先做v2源功能/协议/多数据库变化盘点，编写`docs/versions/v2/spec.md`、`docs/contracts/v2.md`和分步计划，再按契约→实现→验证→验收循环推进。v2范围为上传、PDF/DOCX/PPTX/XLSX/TXT解析与RustFS；具体接口以固定v2源码与运行证据为准，不沿用聊天猜测。v1不需重做，不推送/发布。
 
 ## 验证与运行资源
 
@@ -50,16 +50,17 @@ Task5最终：两个DB开关均1，task5-final-015完整242 passed、0 skipped�
 
 Task6最终：两个DB开关均1，task6-final-026完整444 passed、0 skipped、0 failed，生产语句+分支覆盖94.85%，约197秒。Ruff check/format最终170文件通过；mypy strict94文件、行数91生产/脚本文件最长137/300、uv锁46依赖通过。独立审查0Critical/3Important/0Minor；Uvicorn异常泄漏、解码/压缩和JSON词法经一次修复轮RED→GREEN，未二次审查。补SQL文本编码与显式dotenv回归，细节见Task6报告。
 
-Task1旧服务保持停止；Task6补采的原版HTTP进程均已在各自finally停止，真实TCP Uvicorn测试在pytest内正常关闭。最终只读审计临时SQL schema/Mongo集合均0残留；两个`kh-fastapi-v1-test`容器stop后均Exited(0)，卷保留。未使用旧数据卷，参考前后端Git均干净。`.local/legacy-v1`保留源副本，`.local`内保留原始采集和实际输出，均被忽略。当前无需要用户解除的阻塞。
+Task7及合并最终：新锁定环境46依赖；新双库完整451 passed、0 skipped、94.71%，约181秒；Ruff format171文件/check、mypy strict94文件、生产/脚本91文件最长137/300、uv锁检查通过。正式CLI真实TCP五接口及SQL/Mongo状态通过；合并树与v1树相同，合并后契约/E2E197项通过。Task7审查0Critical/1Important/1Minor，后两项均按精确兼容要求经原版真实HTTP RED→GREEN修复，未二次独立审查。详细边界见[验收记录](../versions/v1/acceptance.md)。
+
+Task1旧服务保持停止；Task7补采的原版HTTP进程在finally停止，正式FastAPI进程关闭；3101/38121无监听。最终只读审计临时SQL schema/Mongo集合均0残留；`kh-fastapi-v1-test`与本轮`kh-fastapi-v1-acceptance`各两个容器stop后均Exited(0)，卷保留。未使用旧数据卷，参考前后端Git均干净。`.local/legacy-v1`保留源副本，`.local`内保留原始采集和实际输出，均被忽略。当前无需要用户解除的阻塞。
 
 当前主机系统pytest临时目录有账户权限差异；需要tmp_path时使用新命名的项目内`--basetemp=.local/pytest-runs/<本次标识>`，父目录先建立。真实库测试按[Task3复现](../versions/v1/task-3-report.md)启动两个专用容器并设两个环境开关。原HTTP仅在确需新旧对比时启动，不重复采集覆盖历史快照。
 
 ## 必须读取
 
 1. [开发 SOP](agent-sop.md)
-2. [v1 规格](../versions/v1/spec.md)
-3. [v1 计划](../superpowers/plans/2026-10-28-v1.md)
-4. [v1 契约](../contracts/v1.md)
-5. 按工作需要读取 [架构](architecture.md)、[代码规范](code-standards.md)、[兼容策略](compatibility.md)
+2. [版本路线](roadmap.md)与[v1验收记录](../versions/v1/acceptance.md)
+3. 准备v2时先核对旧NestJS v2源，创建并读取v2规格、契约和计划；沿用的v1边界见[v1契约](../contracts/v1.md)
+4. 按工作需要读取 [架构](architecture.md)、[代码规范](code-standards.md)、[兼容策略](compatibility.md)
 
-接续时同步更新本文件、计划勾选和工作日志。只有完成实际验收且合并 main 后，才把当前版本切换至 v2。
+接续时同步更新本文件、计划勾选和工作日志。v1已合并main；v2须从更新后的main创建，不能从v1派生。

@@ -122,3 +122,10 @@
 - 合并前独立只读全分支审查基准main `5e43438`→Task7阶段提交`50e8da7`：0Critical、1Important、1Minor。根级方括号表单键静默丢弃会把原400变新201；数字未知键错误顺序原400 body不同。因用户要求精确接口兼容，将后者上调Important，固定旧NestJS编译身份后采集3表单+3 JSON/查询无效请求；对应契约分别RED→GREEN。原65传输样本逐项未变，补充证据累计71；原75双库expected不变。审查后未二次独立审查，七项未独立判断的范围与处置见[验收记录](../versions/v1/acceptance.md)。
 - 修复后表单解析拆出根级键辅助函数以满足圈复杂度≤10；Ruff格式171文件/check、mypy strict94文件、生产/脚本91文件最长137/300、uv离线锁46包均通过。最终代码完整双库/契约/E2E`task7-final-code-002` → **451 passed、0 skipped、94.71%**，180.64秒；此前一次边测试边拆函数的中间回归451/93.89%不作最终源码证据。最后SQL临时schema/Mongo集合各0，旧/新服务3101/38121均无监听。
 - 文档/差异审计：25份Markdown、124个相对链接0失效、围栏成对，AGENTS30行，`git diff --check`通过。`docs/versions/v1/acceptance.md`逐项需求→实现→证据已标accepted；当前v1尚未合并main，无remote/云端CI/推送/发布。下一步仅保存最终本地提交并按既有授权合并main、核对SHA和关键回归，之后标merged；不启动v2。
+
+## 2026-10-29 · v1 本地合并与交接
+
+- v1验收修复提交`75f62ed639f784cac5c2e039ac9afcb622327aa5`保存后工作树干净；其merge-base与原main均为`5e43438`。切换main，执行既定`git merge --no-ff v1 -m "merge: integrate v1"`，得到合并提交`d1d4a2703d6be62a4ce11efad9627fe874e897a6`，两亲分别为原main和v1；合并树与v1提交树均为`cfd0081eef5c68a4558b018315244899cbacdf84`。
+- 合并后两个DB开关均1，`tests/contract tests/e2e`关键回归`task7-post-merge-001`实际197 passed、0 skipped，50.66秒；输出位于忽略的`.local/task7-post-merge.log`。最后停止本轮`kh-fastapi-v1-acceptance`两个专用容器，均Exited(0)；原`kh-fastapi-v1-test`同为Exited(0)，卷均保留。没有remote、推送、PR、标签或发布，云端CI未运行。
+- v1验收记录、计划、状态更新为merged，保留v1分支；下一版本v2尚未开始，必须从更新后的main派生。文档交接提交将使main HEAD高于合并SHA，新会话先核对Git再按status继续。
+- 合并后文档审计25份Markdown、126个相对链接0失效/围栏错误；AGENTS30行，`git diff --check`通过。文档提交不改受验收的Python源码树；合并后197项测试已在交接文档修改前运行，修改内容仅为状态与证据。
