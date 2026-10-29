@@ -35,7 +35,8 @@
 3. `docs/superpowers/plans/<date>-vN.md`：文件职责、签名、测试与执行步骤。
 4. 代码、锁文件和所需数据库/索引/MQ 迁移；旧版本回归与本版验证。
 5. `docs/versions/vN/acceptance.md`：验收结果、实际命令、失败与未运行项。
-6. 更新状态、日志、README；获授权后合并 main，并记录合并提交。
+6. `docs/versions/vN/implementation-flow-report.md`：每项需求的入口、模块、数据/副作用、失败恢复、响应与证据链；未完成事项明确标记。
+7. 更新状态、日志、README；获授权后合并 main，并记录合并提交。
 
 ## 贯穿能力的交付节奏
 

@@ -129,3 +129,8 @@
 - 合并后两个DB开关均1，`tests/contract tests/e2e`关键回归`task7-post-merge-001`实际197 passed、0 skipped，50.66秒；输出位于忽略的`.local/task7-post-merge.log`。最后停止本轮`kh-fastapi-v1-acceptance`两个专用容器，均Exited(0)；原`kh-fastapi-v1-test`同为Exited(0)，卷均保留。没有remote、推送、PR、标签或发布，云端CI未运行。
 - v1验收记录、计划、状态更新为merged，保留v1分支；下一版本v2尚未开始，必须从更新后的main派生。文档交接提交将使main HEAD高于合并SHA，新会话先核对Git再按status继续。
 - 合并后文档审计25份Markdown、126个相对链接0失效/围栏错误；AGENTS30行，`git diff --check`通过。文档提交不改受验收的Python源码树；合并后197项测试已在交接文档修改前运行，修改内容仅为状态与证据。
+
+## 2026-10-29 · v1 实现链路说明补充
+
+- 用户要求了解重构中每项内容及其完整链路。新增[逐项链路报告](../versions/v1/implementation-flow-report.md)，基于当前main代码、固定NestJS v1契约、Task1–7阶段报告及验收记录，串起需求→入口/模块→SQL/Mongo副作用或恢复→响应→测试证据，并列出未验证/未实现边界；README与状态增加入口。D032将同名报告纳入后续每版交付，AGENTS保留短规则，SOP/模板/路线写具体要求。
+- 本次仅写文档，不变更业务代码或重跑数据库测试；复核报告必要接口/章节、26份Markdown、226个相对链接均可解析且围栏成对，AGENTS仍30行，`git diff --check`通过。原451/94.71%和合并后197项是此前验收结果，不表示本次重新执行。
