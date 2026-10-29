@@ -10,7 +10,7 @@
 
 新会话从 [AGENTS.md](AGENTS.md) 开始，随后读取 [当前进度与下一步](docs/refactor/status.md) 和 [开发 SOP](docs/refactor/agent-sop.md)。
 
-了解 v1 的需求、文件树、实现链路图和验收结论，阅读 [v1 重构交付报告](docs/versions/v1/implementation-flow-report.md)。
+想从一次完整文档请求学习 FastAPI 的路由、用例、双库存储与恢复，阅读 [v1 文档服务学习讲义](docs/versions/v1/implementation-flow-report.md)。
 
 ## 完整业务闭环
 
