@@ -10,7 +10,7 @@
 
 新会话从 [AGENTS.md](AGENTS.md) 开始，随后读取 [当前进度与下一步](docs/refactor/status.md) 和 [开发 SOP](docs/refactor/agent-sop.md)。
 
-想了解 v1 每项工作如何连接为可运行、可恢复、可验证的完整路径，阅读 [v1 重构内容与链路闭环报告](docs/versions/v1/implementation-flow-report.md)。
+想快速了解 v1 做了什么、链路怎样闭合，阅读 [v1 一页报告](docs/versions/v1/implementation-flow-report.md)。
 
 ## 完整业务闭环
 
