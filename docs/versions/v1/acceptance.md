@@ -1,5 +1,7 @@
 # v1 文档服务验收记录
 
+> 2026-10-30托管补充：`main`和`v1`已推送至[公开GitHub仓库](https://github.com/ZKshun/knowledge-hub-fastapi)，首次[云端CI](https://github.com/ZKshun/knowledge-hub-fastapi/actions/runs/40994987091)成功。下文原验收现场为2026-10-29；文末记录新增云端证据。
+
 - 日期与执行者：2026-10-29，Codex；状态：**merged，本地main已核对**。
 - Python实现分支：`v1`，验收修复提交`75f62ed639f784cac5c2e039ac9afcb622327aa5`；Task7开始前HEAD `b9075b66790b94a537a16e3f14a37a93aaf8ab97`。本地main合并提交`d1d4a2703d6be62a4ce11efad9627fe874e897a6`，其两亲为起点main和v1验收提交，合并树与v1树同为`cfd0081eef5c68a4558b018315244899cbacdf84`。
 - 来源：NestJS v1 `f9dfce20ffe798dc35ede0a74219f06bf3d6980f`；Python起点main `5e43438819bb660612799983c6af52bdef99941e`。
@@ -51,3 +53,10 @@
 - 本地Task7阶段提交：`50e8da7`；最终v1提交：`75f62ed639f784cac5c2e039ac9afcb622327aa5`；本地main合并：`d1d4a2703d6be62a4ce11efad9627fe874e897a6`；合并后197项关键回归通过。全分支审查及修复范围如上。
 - 当前无remote；没有推送、PR、标签或发布，云端CI未运行。v1分支保留，v2尚未创建，只能从已更新的main派生。
 - 下一会话以[当前状态](../../refactor/status.md)和Git核对，再按路线图准备v2。
+
+## 2026-10-30 · GitHub托管与云端验收补充
+
+- 用户授权创建公开仓库`ZKshun/knowledge-hub-fastapi`并首次推送`main`、`v1`，默认分支`main`，两个分支已设置upstream。首次远端SHA分别为`fe1da8f13d784651a3ba9b817f7f937e6b818b8d`、`75f62ed639f784cac5c2e039ac9afcb622327aa5`，均与本地相同。
+- [GitHub Actions运行40994987091](https://github.com/ZKshun/knowledge-hub-fastapi/actions/runs/40994987091)在Ubuntu上使用Python3.12与锁定依赖执行真实PostgreSQL/MongoDB全套测试：**451 passed、0 skipped、94.71%**，测试耗时52.53秒，工作流最终success；格式、lint、严格类型、行数和锁文件检查全部通过。
+- 首次推送前检查两分支历史的370个文件对象：常见密钥签名0命中、运行数据及非样例.env路径0命中；这属于定向检查，不表示穷举安全审计。`.local`、真实配置、虚拟环境和数据卷未上传。
+- 以上更新了原记录中“无remote/云端未运行”的当前状态。尚未创建Release、标签或部署生产服务；生产故障演练和旧业务库导入边界保持原验收说明。

@@ -12,6 +12,8 @@
 
 想从一次完整文档请求学习 FastAPI 的路由、用例、双库存储与恢复，阅读 [v1 文档服务学习讲义](docs/versions/v1/implementation-flow-report.md)。
 
+公开代码仓库：[ZKshun/knowledge-hub-fastapi](https://github.com/ZKshun/knowledge-hub-fastapi)。`main` 为集成分支，`v1` 保留本版验收实现；2026-10-30首次[GitHub Actions](https://github.com/ZKshun/knowledge-hub-fastapi/actions/runs/40994987091)通过，451项测试、0跳过、覆盖率94.71%。
+
 ## 完整业务闭环
 
 ```text
@@ -112,6 +114,6 @@ uv run --locked pytest tests/unit tests/integration tests/contract tests/e2e -q 
 docker compose -p kh-fastapi-v1-test -f deploy/compose.test.yml stop
 ```
 
-Windows临时目录权限不同时给pytest增加新的项目内`--basetemp=.local/pytest-runs/<标识>`，先建父目录；不开两个DB开关会跳过真实库用例，不能算完整验收。[质量工作流](.github/workflows/quality.yml)复用这些命令，但当前Python仓库无remote，云端运行未发生。原版75项HTTP/双库证据、71项传输证据和文本编码证据已版本化，无需构建Nest服务即可重放；重新采集原版的隔离流程见[基线复现](docs/versions/v1/contract-baseline.md)。`stop`保留本项目测试卷和数据。
+Windows临时目录权限不同时给pytest增加新的项目内`--basetemp=.local/pytest-runs/<标识>`，先建父目录；不开两个DB开关会跳过真实库用例，不能算完整验收。[质量工作流](.github/workflows/quality.yml)复用这些命令，在推送`main`或`v*`分支时运行；实际云端结果记录在[当前状态](docs/refactor/status.md)。原版75项HTTP/双库证据、71项传输证据和文本编码证据已版本化，无需构建Nest服务即可重放；重新采集原版的隔离流程见[基线复现](docs/versions/v1/contract-baseline.md)。`stop`保留本项目测试卷和数据。
 
 JSON与表单的展开正文上限是100KB；兼容gzip/deflate/br及UTF-8/16/32，失败按原400/413/415返回。请求日志只记录ID、方法、状态、耗时和异常类型。配置名称与占位示例见[.env.example](.env.example)，不会隐式读取本地.env；每个活动进程须分配唯一Snowflake worker ID并共享相同epoch，时间回拨或单毫秒超过4096个ID时明确失败，见[Task2报告](docs/versions/v1/task-2-report.md)。

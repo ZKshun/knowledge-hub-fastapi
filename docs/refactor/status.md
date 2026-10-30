@@ -1,13 +1,14 @@
 # 当前重构状态
 
-最后更新：2026-10-29。此文件是新会话入口中的当前状态摘要；先与实际 Git 核对。
+最后更新：2026-10-30。此文件是新会话入口中的当前状态摘要；先与实际 Git 核对。
 
 ## 当前定位
 
 - 项目：`knowledge-hub/knowledge-hub-fastapi`，独立 Git 仓库。
 - 最新交付：**v1 merged**；下一版本：**v2 planned，分支尚未创建**。
 - 当前分支：`main`；v1从原main `5e43438819bb660612799983c6af52bdef99941e`派生，验收提交`75f62ed639f784cac5c2e039ac9afcb622327aa5`，本地合并提交`d1d4a2703d6be62a4ce11efad9627fe874e897a6`。本文件后续文档提交可能使main HEAD前进，始终先以Git核对。
-- 当前无 remote；v1已本地合并，未推送、发布或打标签；云端CI未运行。
+- 公开仓库：[ZKshun/knowledge-hub-fastapi](https://github.com/ZKshun/knowledge-hub-fastapi)，`origin` 已配置，默认分支为 `main`；`main`、`v1` 已首次推送并设置 upstream。未发布 Release 或打标签。
+- 首次云端 CI：[运行 40994987091](https://github.com/ZKshun/knowledge-hub-fastapi/actions/runs/40994987091)，针对 `main` 的 `fe1da8f`，**success**：Ubuntu/Python3.12真实双库完整451项通过、0跳过、覆盖94.71%，静态门禁全部通过。随后托管记录仅修改文档；最新运行状态以GitHub为准。
 - 来源后端 v1：`f9dfce20ffe798dc35ede0a74219f06bf3d6980f`。
 - 参考后端本地 main：`b4dc6b2`，与本地 origin/main 一致，已取代旧的 v6 结论。
 
@@ -27,16 +28,19 @@
 - [x] Task6：五个FastAPI文档接口、原请求/错误/传输、双库生命周期、日志与入口；原75项双库差分、65项传输及SQL文本编码补证通过。独立审查3项Important经同轮修复，最终444项无跳过、覆盖94.85%，见[需求与实现报告](../versions/v1/task-6-report.md)。
 - [x] Task7：版本化原版SQL测试夹具、只读固定Action质量工作流、锁定依赖干净安装、全新隔离双库和正式CLI真实TCP实测；全分支审查发现的表单根级键与数字错误顺序已由真实旧服务证据RED→GREEN修复，最终451项0跳过、覆盖94.71%，静态门禁及文档审计通过；见[验收记录](../versions/v1/acceptance.md)和[学习讲义](../versions/v1/implementation-flow-report.md)。云端CI因无remote未运行。
 - [x] v1验收后以`--no-ff`本地合并main，合并树与v1验收树相同；合并后原版契约/E2E关键回归197项通过、0跳过。v1分支保留。
+- [x] 2026-10-30：按用户授权创建公开GitHub仓库、推送main/v1，并核验首次云端完整质量工作流成功。
 
 ## 尚未完成
 
-- [ ] v2–v21全部未开始；v2尚无分支、规格、契约或实现。当前无remote，云端CI仍待将来托管平台运行。
+- [ ] v2–v21全部未开始；v2尚无分支、规格、契约或实现。
 
 ## 下一项可直接执行的任务
 
-下次按用户要求开始v2时：先核对main实际HEAD/工作区及[验收记录](../versions/v1/acceptance.md)，读取[开发SOP](agent-sop.md)、[版本路线](roadmap.md)及旧NestJS v2来源；从**更新后的main**新建`v2`，先做v2源功能/协议/多数据库变化盘点，编写`docs/versions/v2/spec.md`、`docs/contracts/v2.md`和分步计划，再按契约→实现→验证→验收循环推进。v2范围为上传、PDF/DOCX/PPTX/XLSX/TXT解析与RustFS；具体接口以固定v2源码与运行证据为准，不沿用聊天猜测。v1不需重做，不推送/发布。
+下次按用户要求开始v2时：先核对main实际HEAD/工作区、`origin/main`及[验收记录](../versions/v1/acceptance.md)，读取[开发SOP](agent-sop.md)、[版本路线](roadmap.md)及旧NestJS v2来源；从**更新后的main**新建`v2`，先做v2源功能/协议/多数据库变化盘点，编写`docs/versions/v2/spec.md`、`docs/contracts/v2.md`和分步计划，再按契约→实现→验证→验收循环推进。v2范围为上传、PDF/DOCX/PPTX/XLSX/TXT解析与RustFS；具体接口以固定v2源码与运行证据为准，不沿用聊天猜测。v1不需重做；本次首次推送已获用户授权，后续推送与发布依当时授权执行。
 
 ## 验证与运行资源
+
+2026-10-30首次GitHub托管：公开仓库创建成功，`main`（`fe1da8f`）与`v1`（`75f62ed`）首次推送的远端SHA和本地一致。GitHub Actions首次完整运行成功，451 passed in 52.53s、94.71%，静态门禁172文件格式检查、mypy94文件通过；测试容器在云端任务结束时停止。本机未重启双库。此前各Task记录中的“无remote/云端未运行”描述2026-10-29的验收现场。
 
 Task 1：31 passed、0 skipped、0 failed；包括真实 MongoDB 索引准备和全部证据哈希/归一化验证。Ruff、mypy strict（13 个源文件）通过，最长手写生产/脚本文件 105 行。完整 v1 的生产覆盖率、CRUD、故障恢复及新旧服务差分尚未验证，不能据此验收 v1。
 
